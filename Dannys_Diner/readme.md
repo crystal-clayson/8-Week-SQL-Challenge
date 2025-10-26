@@ -1,4 +1,3 @@
 # Case Study - Danny's Dinner
-## Introduction
-Danny seriously loves Japanese food so in the beginning of 2021, he decides to embark upon a risky venture and opens up a cute little restaurant that sells his 3 favourite foods: sushi, curry and ramen.
-Danny’s Diner is in need of your assistance to help the restaurant stay afloat - the restaurant has captured some very basic data from their few months of operation but have no idea how to use their data to help them run the business.
+## Business Task
+Danny’s Diner, a new Japanese restaurant, has asked for assistance in using customer data to help them run the business, and has provided a sample of customer data to work with. The stakeholders have asked for SQL queries to answer a series of questions, and noted that the queries need to be scalable to the full dataset. 
