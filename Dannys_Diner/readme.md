@@ -43,3 +43,28 @@ GROUP BY customer_id;
 | B	          | 6          |
 | C           |	2          |
 
+### 3. What was the first item from the menu purchased by each customer?
+#### Code
+``` sql
+WITH cte AS (
+	SELECT customer_id, order_date, product_name,
+		RANK () OVER (PARTITION BY customer_id ORDER BY order_date ASC) AS rnk
+	FROM sales AS s
+	JOIN menu AS m ON s.product_id = m.product_id
+    )
+SELECT customer_id, product_name
+FROM cte
+WHERE rnk = 1
+GROUP BY customer_id, product_name;
+```
+#### Explanation
+- ```RANK () OVER (PARTITION BY customer_id)``` will return the order in which items were ordered by each customer.
+- Putting those values into a ```cte``` and selecting rows with ```rnk``` of 1 returns the first item ordered by each customer.
+- In the case of customer A, two items were ordered at the same time, so both are returned.
+#### Answer
+| customer_id | product_name |
+|-------------|--------------|
+| A           | curry        |
+| A           | sushi        |
+| B           |	curry        |
+| C           |	ramen        |
