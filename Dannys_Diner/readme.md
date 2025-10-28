@@ -152,6 +152,7 @@ WHERE rnk = 1;
 #### Explanation
 #### Answer
 | customer_id | product_name |
+|-------------|--------------|
 | A           | sushi        |
 | A           | curry        |
 | B           | sushi        |
