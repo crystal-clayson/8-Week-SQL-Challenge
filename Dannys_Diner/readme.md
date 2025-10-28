@@ -68,3 +68,133 @@ GROUP BY customer_id, product_name;
 | A           | sushi        |
 | B           |	curry        |
 | C           |	ramen        |
+
+### 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+#### Code
+``` sql
+SELECT TOP 1 product_name, 
+	COUNT(order_date) AS orders
+FROM sales AS s
+JOIN menu AS m ON s.product_id = m.product_id
+GROUP BY product_name
+ORDER BY orders DESC;
+```
+#### Explanation
+#### Answer
+| product_name | orders |
+|--------------|--------|
+| ramen        | 8      |
+
+### 5. Which item was the most popular for each customer?
+#### Code
+``` sql
+WITH cte5 AS (
+	SELECT customer_id, product_name,
+		COUNT(order_date) AS orders,
+		RANK () OVER (PARTITION BY customer_id ORDER BY COUNT(order_date) DESC) AS rnk
+	FROM sales AS s
+	JOIN menu AS m ON s.product_id = m.product_id
+	GROUP BY product_name, customer_id
+	)
+SELECT customer_id, product_name, orders
+FROM cte5
+WHERE rnk = 1;
+```
+#### Explanation
+#### Answer
+| customer_id | product_name | orders |
+| ------------|--------------|--------|
+| A           | ramen        | 3      |
+| B           | curry        | 2      |
+| B           | ramen        | 2      |
+| B           | sushi        | 2      |
+| C           | ramen        | 3      |
+
+### 6. Which item was purchased first by the customer after they became a member?
+#### Code
+``` sql
+WITH cte6 AS (
+    SELECT s.customer_id, order_date, m.product_name,
+			RANK () OVER (PARTITION BY s.customer_id ORDER BY s.order_date ASC) AS rnk,
+			ROW_NUMBER () OVER(PARTITION BY s.customer_id ORDER BY s.order_date ASC) AS rnmb
+	FROM sales AS s
+	JOIN members AS mem ON s.customer_id = mem.customer_id
+	JOIN menu AS m ON s.product_id = m.product_id
+	WHERE order_date >= join_date
+    )
+SELECT customer_id, product_name
+FROM cte6
+WHERE rnk = 1;
+```
+#### Explanation
+#### Answer
+| customer_id | product_name |
+|-------------|--------------|
+| A           | curry        |
+| B           | sushi        |
+
+### 7. Which item was purchased just before the customer became a member?
+#### Code
+``` sql
+WITH cte7 AS (
+    SELECT s.customer_id, order_date, m.product_name,
+			RANK () OVER (PARTITION BY s.customer_id ORDER BY s.order_date DESC) AS rnk,
+			ROW_NUMBER () OVER(PARTITION BY s.customer_id ORDER BY s.order_date DESC) AS rnmb
+	FROM sales AS s
+	JOIN members AS mem ON s.customer_id = mem.customer_id
+	JOIN menu AS m ON s.product_id = m.product_id
+	WHERE order_date < join_date
+    )
+SELECT customer_id, product_name
+FROM cte7
+WHERE rnk = 1;
+```
+#### Explanation
+#### Answer
+| customer_id | product_name |
+| A           | sushi        |
+| A           | curry        |
+| B           | sushi        |
+
+### 8. What is the total items and amount spent for each member before they became a member?
+#### Code
+``` sql
+SELECT s.customer_id AS customer, 
+	COUNT(order_date) AS total_items,
+    SUM(price) AS total_spend
+FROM sales AS s
+JOIN members AS mem ON s.customer_id = mem.customer_id
+JOIN menu AS m ON s.product_id = m.product_id
+WHERE order_date < join_date
+GROUP BY s.customer_id;
+```
+#### Explanation
+#### Answer
+| customer | total_items | total_spend |
+|----------|-------------|-------------|
+| A        | 2           | 25          |
+| B        | 3           | 40          |
+
+### 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+#### Code
+``` sql
+SELECT s.customer_id AS customer, 
+	SUM(CASE WHEN s.product_id = 1 THEN price * 2*10 ELSE price*10 END) AS points
+FROM sales AS s
+JOIN members AS mem ON s.customer_id = mem.customer_id
+JOIN menu AS m ON s.product_id = m.product_id
+WHERE order_date < join_date
+GROUP BY s.customer_id;
+```
+#### Explanation
+#### Answer
+| customer | points |
+|----------|--------|
+| A        | 350    |
+| B        | 500    |
+
+### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+#### Code
+
+#### Explanation
+#### Answer
