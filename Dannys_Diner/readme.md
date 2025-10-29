@@ -73,13 +73,17 @@ GROUP BY customer_id, product_name;
 #### Code
 ``` sql
 SELECT TOP 1 product_name, 
-	COUNT(order_date) AS orders
+	COUNT(*) AS orders
 FROM sales AS s
 JOIN menu AS m ON s.product_id = m.product_id
 GROUP BY product_name
 ORDER BY orders DESC;
 ```
 #### Explanation
+- JOIN ON ```sales.product_id = menu.product_id``` to link the product name with the product id
+- GROUP BY product name and COUNT all entries for each group
+- ORDER BY the ordrers total
+
 #### Answer
 | product_name | orders |
 |--------------|--------|
