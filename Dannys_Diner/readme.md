@@ -182,7 +182,7 @@ WHERE order_date < join_date
 GROUP BY s.customer_id;
 ```
 #### Explanation
-- JOIN ```member``` and ```menu``` tables
+- JOIN multiple times to get ```order_date``` from ```sales```, ```join_date``` from ```members```, and ```product_name``` from ```menu```
 - Filter for ```order_date``` before ```join_date```
 - GROUP BY customer_id and use COUNT and SUM to get the required figures.
 #### Answer
@@ -203,11 +203,15 @@ WHERE order_date < join_date
 GROUP BY s.customer_id;
 ```
 #### Explanation
+- JOIN multiple times to get ```order_date``` from ```sales```, ```join_date``` from ```members```, and ```product_name``` from ```menu```
+- Filter for ```order_date``` on or after the ```join_date```.
+- GROUP BY  ```customer_id```
+- SUM CASE WHEN to handle the points multipliers.
 #### Answer
 | customer | points |
 |----------|--------|
-| A        | 350    |
-| B        | 500    |
+| A        | 510    |
+| B        | 440    |
 
 ### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
 #### Code
@@ -227,10 +231,15 @@ WITH cte10 AS (
 SELECT customer_id,
 	SUM(points) AS jan_points
 FROM cte10
-GROUP BY customer_id
-ORDER BY customer_id;
+GROUP BY customer_id;
 ```
 #### Explanation
+- Create a CTE
+	- JOIN multiple times to get ```order_date``` from ```sales```, ```join_date``` from ```members```, and ```product_name``` from ```menu```
+	- Filter for ```order_date``` during January
+   	- Use CASE WHEN to assign 2x points during the first week after joining, 2x points on sushi always, and 1x points on all other purchases.
+-SELECT the SUM of points from the CTE.
+	
 #### Answer
 | customer_id | jan_points |
 |-------------|------------|
