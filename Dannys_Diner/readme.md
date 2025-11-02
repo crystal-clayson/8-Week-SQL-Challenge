@@ -95,7 +95,7 @@ ORDER BY orders DESC;
 WITH cte5 AS (
 	SELECT customer_id, product_name,
 		COUNT(order_date) AS orders,
-		RANK () OVER (PARTITION BY customer_id ORDER BY COUNT(order_date) DESC) AS rnk
+		RANK () OVER (PARTITION BY customer_id ORDER BY COUNT(*) DESC) AS rnk
 	FROM sales AS s
 	JOIN menu AS m ON s.product_id = m.product_id
 	GROUP BY product_name, customer_id
@@ -105,6 +105,9 @@ FROM cte5
 WHERE rnk = 1;
 ```
 #### Explanation
+- In the case of a tie for the top item for each customer, all tied items need to be in the results.
+- Create a CTE with ``` RANK () OVER (PARTITION BY customer_id ORDER BY COUNT(*) DESC)  ```
+- SELECT the items with a ```rnk``` of 1. 
 #### Answer
 | customer_id | product_name | orders |
 | ------------|--------------|--------|
@@ -118,9 +121,8 @@ WHERE rnk = 1;
 #### Code
 ``` sql
 WITH cte6 AS (
-    SELECT s.customer_id, order_date, m.product_name,
-			RANK () OVER (PARTITION BY s.customer_id ORDER BY s.order_date ASC) AS rnk,
-			ROW_NUMBER () OVER(PARTITION BY s.customer_id ORDER BY s.order_date ASC) AS rnmb
+    SELECT s.customer_id, s.order_date, m.product_name,
+			RANK () OVER (PARTITION BY s.customer_id ORDER BY s.order_date ASC) AS rnk
 	FROM sales AS s
 	JOIN members AS mem ON s.customer_id = mem.customer_id
 	JOIN menu AS m ON s.product_id = m.product_id
@@ -131,6 +133,10 @@ FROM cte6
 WHERE rnk = 1;
 ```
 #### Explanation
+- Only customers A and B are members, so we need to make sure that customer C does not appear in the results.
+- JOIN multiple times to get ```order_date``` from ```sales```, ```join_date``` from ```members```, and ```product_name``` from ```menu```
+- Create a CTE from the joined tables, with ```RANK () OVER (PARTITION BY s.customer_id ORDER BY s.order_date ASC)``` and filtering for ```order_date``` after ```join_date```
+- SELECT rows from the CTE with ```rnk``` of 1.
 #### Answer
 | customer_id | product_name |
 |-------------|--------------|
@@ -142,8 +148,7 @@ WHERE rnk = 1;
 ``` sql
 WITH cte7 AS (
     SELECT s.customer_id, order_date, m.product_name,
-			RANK () OVER (PARTITION BY s.customer_id ORDER BY s.order_date DESC) AS rnk,
-			ROW_NUMBER () OVER(PARTITION BY s.customer_id ORDER BY s.order_date DESC) AS rnmb
+			RANK () OVER (PARTITION BY s.customer_id ORDER BY s.order_date DESC) AS rnk
 	FROM sales AS s
 	JOIN members AS mem ON s.customer_id = mem.customer_id
 	JOIN menu AS m ON s.product_id = m.product_id
@@ -154,6 +159,9 @@ FROM cte7
 WHERE rnk = 1;
 ```
 #### Explanation
+- JOIN multiple times to get ```order_date``` from ```sales```, ```join_date``` from ```members```, and ```product_name``` from ```menu```
+- Create a CTE from the joined tables, with ```RANK () OVER (PARTITION BY s.customer_id ORDER BY s.order_date DESC)``` and filtering for ```order_date``` before ```join_date```
+- SELECT rows from the CTE with ```rnk``` of 1.
 #### Answer
 | customer_id | product_name |
 |-------------|--------------|
@@ -174,6 +182,9 @@ WHERE order_date < join_date
 GROUP BY s.customer_id;
 ```
 #### Explanation
+- JOIN ```member``` and ```menu``` tables
+- Filter for ```order_date``` before ```join_date```
+- GROUP BY customer_id and use COUNT and SUM to get the required figures.
 #### Answer
 | customer | total_items | total_spend |
 |----------|-------------|-------------|
