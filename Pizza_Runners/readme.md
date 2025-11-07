@@ -182,20 +182,37 @@ ORDER BY co.customer_id
 
 ### 6. What was the maximum number of pizzas delivered in a single order?
 #### Explanation
+We'll need to filter out cancelled orders, so we'll first join the ```customer_orders``` and ```runner_orders``` tables. Then we'll filter, group by the order id, and select the highest count of pizza id's. 
 #### Code
+```sql
+SELECT TOP 1 COUNT(*) AS pizzas
+FROM runner_orders AS ro
+JOIN customer_orders AS co
+	ON ro.order_id = co.order_id
+WHERE cancellation = ''
+GROUP BY co.order_id
+ORDER BY COUNT(co.pizza_id) DESC;
+```
 #### Results
+| pizzas |
+|--------|
+| 3      |
+
 ### 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
 #### Explanation
 #### Code
 #### Results
+
 ### 8. How many pizzas were delivered that had both exclusions and extras?
 #### Explanation
 #### Code
 #### Results
+
 ### 9. What was the total volume of pizzas ordered for each hour of the day?
 #### Explanation
 #### Code
 #### Results
+
 ### 10. What was the volume of orders for each day of the week?
 #### Explanation
 #### Code
