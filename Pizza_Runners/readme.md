@@ -5,9 +5,12 @@
   * [Data Cleaning](#data-cleaning)
 
 ## Business Task
+After the success of his Japanese eatery, Danny has now opened a pizza delivery business. He ahs recruited runners to deliver pizzas from Pizza Runner Headquarters. Danny has gathered data regarding orders and needs us to clean and analyze the data to optimise operations.
+
 ## Data Overview
 The data comprises six tables.
 ![Data Relationship Diagram](/images/pizza_runners_database_diagram.png)
+
 ## Data Cleaning
 We need to do some data cleaning to standardize the data before doing any analysis. We'll start with the ```customer_orders``` table. 
 
