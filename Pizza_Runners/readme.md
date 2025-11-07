@@ -120,16 +120,66 @@ FROM runner_orders;
 
 ### 3. How many successful orders were delivered by each runner?
 #### Explanation
+Using the ```runner_orders``` table, we need to filter out orders that were cancelled before pickup, then group by the runner id and count each row.
 #### Code
+```sql
+SELECT runner_id, 
+	COUNT(*) AS orders_delivered
+FROM runner_orders
+WHERE cancellation = ''
+GROUP BY runner_id;
+```
 #### Results
+|runner_id|orders_delivered|
+|---------|----------------|
+|    1    |       4        |
+|    2    |       3        |
+|    3    |       1        |
+
 ### 4. How many of each type of pizza was delivered?
+We'll need to pull ``` pizza_id``` from the ```customer_orders``` table, ```pizza_name``` from the ```pizza_names``` table, and ```cancellation``` from the ```runner_orders``` table. Then, we'll filter to remove orders that weren't delivered, group by the pizza name, and count all rows in each group.
 #### Explanation
 #### Code
+```sql
+SELECT pn.pizza_name, COUNT(*) AS total_delivered
+FROM runner_orders AS ro
+JOIN customer_orders AS co
+	ON ro.order_id = co.order_id
+JOIN pizza_names AS pn
+	ON co.pizza_id = pn.pizza_id
+WHERE cancellation = ''
+GROUP BY pn.pizza_name;
+```
 #### Results
+| pizza_name | total_delivered |
+|------------|-----------------|
+| Meatlovers |        9        |
+| Vegetarian |        3        |
+
 ### 5. How many Vegetarian and Meatlovers were ordered by each customer?
 #### Explanation
+We'll join the 	```pizza_names``` table to the ```customer_orders``` table so that we can include the pizza name in our result for better understanding of the results. Then, aggregate the data by both ```pizza_name``` and ```customer_id``` and count each row.
 #### Code
+```sql
+SELECT co.customer_id, pn.pizza_name, COUNT(*) AS total_ordered
+FROM customer_orders AS co
+JOIN pizza_names AS pn
+	ON co.pizza_id = pn.pizza_id
+GROUP BY pn.pizza_name, co.customer_id
+ORDER BY co.customer_id
+```
 #### Results
+| customer_id | pizza_name | total_ordered |
+|-------------|------------|---------------|
+| 101 |	Meatlovers |	2 |
+| 101 |	Vegetarian |	1 |
+| 102 |	Meatlovers |	2 |
+| 102 |	Vegetarian |	1 |
+| 103 |	Meatlovers |	3 |
+| 103 |	Vegetarian |	1 |
+| 104 |	Meatlovers |	3 |
+| 105 |	Vegetarian |	1 |
+
 ### 6. What was the maximum number of pizzas delivered in a single order?
 #### Explanation
 #### Code
