@@ -279,12 +279,43 @@ ORDER BY DATEPART(DW, order_time);
 ## B. Runner and Customer Experience
 ### 1. How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)
 #### Explanation
+The function ```DATEPART(wk, date)``` will return the week number, with the first week of the year beginning on January 1, so we'll use ```DATEPART(wk, regisration_date) to group runner registrations into weeks, then ```COUNT``` all rows.
 #### Code
+```sql
+SELECT DATEPART(wk, registration_date) AS week, COUNT(*) AS signups
+FROM runners
+GROUP BY DATEPART(wk, registration_date)
+ORDER BY DATEPART(wk, registration_date);
+```
 #### Results
+| week | 	signups | 
+|------|------------|
+| 1    | 	2       | 
+| 2    | 	1       | 
+| 3    | 	1       | 
+
 ### 2. What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
 #### Explanation
+
 #### Code
+```sql
+WITH cte_leadtime AS (
+	SELECT DISTINCT ro.order_id, ro.runner_id, 
+		DATEdiff(minute, order_time, pickup_time) AS leadtime
+	FROM runner_orders AS ro
+	left JOIN customer_orders AS co ON ro.order_id = co.order_id
+    )
+SELECT lt.runner_id, round(avg(lt.leadtime), 0) AS avg_leadtime
+FROM cte_leadtime AS lt
+GROUP BY lt.runner_id;
+```
 #### Results
+| runner_id | avg_leadtime |
+|-----------|--------------|
+| 1	        | 14           |
+| 2	        | 20           |
+| 3	        | 10           |
+
 ### 3. Is there any relationship between the number of pizzas and how long the order takes to prepare?
 #### Explanation
 #### Code
