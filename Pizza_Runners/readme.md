@@ -200,13 +200,42 @@ ORDER BY COUNT(co.pizza_id) DESC;
 
 ### 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
 #### Explanation
+After joing the ```runner_orders``` and ```customer_orders``` tables, filtering out cancelled orders, and grouping by the customer id, we'll use COUNT CASE WHEN statements to calculate the changed and unchaged pizza totals.
 #### Code
+```sql
+SELECT customer_id, 
+	COUNT(CASE WHEN exclusions != '' OR extras !='' THEN 1 END) AS total_changes,
+	COUNT(CASE WHEN extras = '' AND exclusions = '' THEN 1 END) AS total_plain
+FROM runner_orders AS ro
+JOIN customer_orders AS co
+	ON ro.order_id = co.order_id
+WHERE cancellation = ''
+GROUP BY customer_id;
+```
 #### Results
+| customer_id |	total_changes |	total_plain |
+|-------------|---------------|-------------|
+| 101         |	0 			  |	2 			|
+| 102		  |	0             |	3 			|
+| 103		  |	3 			  |	0 			|
+| 104      	  |	2 			  |	1 			|
+| 105 		  |	1 			  |	0 			|
 
 ### 8. How many pizzas were delivered that had both exclusions and extras?
 #### Explanation
+After joing the ```runner_orders``` and ```customer_orders``` tables,and filtering out cancelled orders, we'll use a COUNT CASE WHEN statement to calculate the total number of special pizzas.
 #### Code
+```sql
+SELECT COUNT(CASE WHEN exclusions != '' AND extras != '' THEN 1 END) AS total_special
+FROM runner_orders AS ro
+JOIN customer_orders AS co
+	ON ro.order_id = co.order_id
+WHERE cancellation = '';
+```
 #### Results
+| total_special |
+|---------------|
+| 1 			|
 
 ### 9. What was the total volume of pizzas ordered for each hour of the day?
 #### Explanation
@@ -215,9 +244,21 @@ ORDER BY COUNT(co.pizza_id) DESC;
 
 ### 10. What was the volume of orders for each day of the week?
 #### Explanation
+We need to use ```DATENAME``` in both the ```SELECT``` and ```GROUP BY``` statements. We will also used ```DATEPART``` in the ````GROUP BY``` and ```ORDER BY``` statements so that the results will be in consequtive order.
 #### Code
+```sql
+SELECT DATENAME(DW, order_time) AS day, COUNT(*) AS pizzas
+from customer_orders
+GROUP BY DATENAME(DW, order_time), DATEPART(DW, order_time)
+ORDER BY DATEPART(DW, order_time);
+```
 #### Results
-
+| day       |	pizzas |
+|-----------|----------|
+| Wednesday	| 5        |
+| Thursday	| 3 	   |
+| Friday	| 1 	   |	
+| Saturday	| 5  	   |
 
 ## B. Runner and Customer Experience
 ### 1. How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)
