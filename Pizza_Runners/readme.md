@@ -94,12 +94,30 @@ SELECT * FROM pizza_toppings;
 ## A. Pizza Metrics
 ### 1. How many pizzas were ordered?
 #### Explanation
+The ```customer_orders``` table has one row for each pizza ordered, so we will do a ```COUNT``` of all rows ```FROM customer_orders``` to find the total number of pizzas ordered.
 #### Code
+``` sql
+SELECT COUNT(*) AS total_pizzas
+FROM customer_orders; 
+```
 #### Results
+|total_pizzas|
+|------------|
+|      14    |
+
 ### 2. How many unique customer orders were made?
 #### Explanation
+The ```runner_orders``` table has one row for each customer order, so we will do a ```COUNT``` of all rows ```FROM runner_orders``` to find the total number of unique customer orders.
 #### Code
+```sql
+SELECT COUNT(*) AS total_orders
+FROM runner_orders;
+```
 #### Results
+|total_orders|
+|------------|
+|     10     |
+
 ### 3. How many successful orders were delivered by each runner?
 #### Explanation
 #### Code
