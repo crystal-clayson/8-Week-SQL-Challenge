@@ -239,8 +239,24 @@ WHERE cancellation = '';
 
 ### 9. What was the total volume of pizzas ordered for each hour of the day?
 #### Explanation
+We need to use ```DATENAME``` in both the ```SELECT``` and ```GROUP BY``` statements to group the results by hour. 
 #### Code
+```sql
+SELECT DATEPART(hh, order_time) AS hour,
+	COUNT(*) AS pizza_volume
+FROM customer_orders
+GROUP BY DATEPART(hh, order_time)
+ORDER BY DATEPART(hh, order_time);
+```
 #### Results
+| hour | pizza_volume | 
+|------|--------------|
+| 11   | 	1 		  | 
+| 13   | 	3 		  | 
+| 18   | 	3 		  | 
+| 19   | 	1 		  | 
+| 21   | 	3 		  | 
+| 23   | 	3 		  | 
 
 ### 10. What was the volume of orders for each day of the week?
 #### Explanation
