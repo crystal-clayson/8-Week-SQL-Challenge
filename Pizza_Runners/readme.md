@@ -60,3 +60,12 @@ ALTER TABLE runner_orders
 ALTER COLUMN distance DECIMAL(3,1);
 ```
 ![Clean runner_orders](/images/p_r_0_4.png)
+
+The remainder of the tables appear ready to use.
+```sql
+SELECT * FROM runners;
+SELECT * FROM pizza_names;
+SELECT * FROM pizza_recipes;
+SELECT * FROM pizza_toppings;
+```
+![runners, pizza_names, pizza_recipes, and pizza_toppings tables](/images/p_r_0_5.png)
