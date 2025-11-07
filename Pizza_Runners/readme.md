@@ -1,4 +1,9 @@
 # Case Study - Pizza Runners
+- [Case Study - Pizza Runners](#case-study---pizza-runners)
+  * [Business Task](#business-task)
+  * [Data Overview](#data-overview)
+  * [Data Cleaning](#data-cleaning)
+
 ## Business Task
 ## Data Overview
 The data comprises six tables.
