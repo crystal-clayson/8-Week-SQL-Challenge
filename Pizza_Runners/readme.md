@@ -318,7 +318,7 @@ GROUP BY lt.runner_id;
 
 ### 3. Is there any relationship between the number of pizzas and how long the order takes to prepare?
 #### Explanation
-
+We need to copare the average prep time for each order quantity. To do so, we will create a CTE with ```order_id```, ```order_time```, and a ```COUNT``` of pizzas in each order from the ```customer_orders``` table. Once we have that CTE, we'll ```JOIN``` with the ```runner_orders``` table to bring in the ```pickup_time``` so that we can calculate the average preptime for orders of quantity 1, 2, and 3, as well as the average time per pizza.
 #### Code
 ```sql
 WWITH cte_count AS (
@@ -327,6 +327,7 @@ WWITH cte_count AS (
 	GROUP BY order_id, order_time
     )
 SELECT quantity,
+	COUNT(*) AS no_of_orders,
 	AVG(CAST(DATEDIFF(MINUTE, order_time, pickup_time) AS FLOAT)) AS avg_preptime,
 	AVG(CAST(DATEDIFF(MINUTE, order_time, pickup_time) AS FLOAT))/quantity AS avg_per_pizza
 FROM cte_count AS co
@@ -335,22 +336,48 @@ WHERE cancellation = ''
 GROUP BY quantity
 ORDER BY quantity;
 ```
-#### 
-| quantity | avg_prep_time | avg_per_pizza |
-|----------|---------------|---------------|
-| 1        | 12.2          | 12.2          |
-| 2        | 18.5          | 9.25          |
-| 3        | 30            | 10            |
+#### Results
+While the average time per pizza decreases somewhat for larger quantity orders, the average total prep time increases. To decrease the prep time for larger orders, we recommend investing in ovens with a larger capacity so that all pizzas in an order leave the oven at approximately the same time. However, it is important to note that the calculations may not reflect effeciency gains with larger numbers of multi-pizza orders.
+| quantity | no_of_orders | avg_preptime | avg_per_pizza |
+|----------|--------------|--------------|---------------|
+| 1        | 5            | 12.2         | 12.2          |
+| 2        | 2            | 18.5         | 9.25          |
+| 3        | 1            | 30           | 10            |
 
 
 ### 4. What was the average distance travelled for each customer?
 #### Explanation
+We will use a subquery in the ```FROM``` statement to pull unique ```order_id``` and ```customer_id``` pairs from the ```customer_orders``` table. Then we'll ```JOIN``` with the ```runner_orders``` table to bring in the distance traveled to each customer. Finally, we'll take the average distance, grouped by ```customer_id```.
 #### Code
+```sql
+SELECT co.customer_id, AVG(ro.distance ) AS avg_distance
+FROM (SELECT DISTINCT order_id, customer_id FROM customer_orders) AS co
+ JOIN runner_orders AS ro ON co.order_id = ro.order_id
+GROUP BY customer_id;
+```
 #### Results
+| customer_id |	avg_distance |
+|-------------|--------------|
+| 101		  |	20.000000	 |
+| 102 		  |	18.400000	 |
+| 103		  |	23.400000	 |
+| 104		  |	10.000000	 |
+| 105		  |	25.000000	 |
+
 ### 5. What was the difference between the longest and shortest delivery times for all orders?
 #### Explanation
 #### Code
+```sql
+SELECT min(duration) AS shortest, 
+	max(duration) AS longest, 
+	max(duration)-min(duration) AS difference
+FROM runner_orders;
+```
 #### Results
+| shortest | longest | difference |
+|----------|---------|------------|
+| 10.0     | 40.0    | 30.0       |
+
 ### 6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
 #### Explanation
 #### Code
