@@ -299,15 +299,11 @@ ORDER BY DATEPART(wk, registration_date);
 
 #### Code
 ```sql
-WITH cte_leadtime AS (
-	SELECT DISTINCT ro.order_id, ro.runner_id, 
-		DATEdiff(minute, order_time, pickup_time) AS leadtime
-	FROM runner_orders AS ro
-	left JOIN customer_orders AS co ON ro.order_id = co.order_id
-    )
-SELECT lt.runner_id, round(avg(lt.leadtime), 0) AS avg_leadtime
-FROM cte_leadtime AS lt
-GROUP BY lt.runner_id;
+SELECT ro.runner_id, AVG(DATEDIFF(MINUTE, co.order_time, ro.pickup_time)) AS leadtime
+FROM (SELECT DISTINCT order_id, customer_id, order_time FROM customer_orders) AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id
+GROUP BY ro.runner_id;
+
 ```
 #### Results
 | runner_id | avg_leadtime |
