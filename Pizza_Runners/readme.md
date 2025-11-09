@@ -418,8 +418,50 @@ ORDER BY runner_id;
 ## C. Ingredient Optimisation
 ### 1. What are the standard ingredients for each pizza?
 #### Explanation
+As a reminder, the ```pizza_recipes``` table lists the toppings in a string of the topping id's. 
+| pizza_id | toppings                |
+|----------|-------------------------|
+| 1        | 1, 2, 3, 4, 5, 6, 8, 10 |
+| 2        | 4, 6, 7, 9, 11, 12      |
+
+The first task to answer this question is to expand these comma separated strings and ```CROSS APPLY``` them to the ```pizza_id``` column. A CTE is created with this information, as follows.
+| pizza_id | topping |
+|----------|---------|
+| 1	       | 1       |
+| 1	       | 2       |
+| 1	       | 3       |
+| 1	       | 4       |
+| 1	       | 5       |
+| 1	       | 6       |
+| 1	       | 8       |
+| 1	       | 10      |
+| 2	       | 4       |
+| 2	       | 6       |
+| 2	       | 7       |
+| 2	       | 9       |
+| 2	       | 11      |
+| 2	       | 12      |
+Next, this CTE is joined with the ```pizza_toppings``` table to bring in the topping names, for clarity. Finally, we add a ```HAVING``` clause to return only the toppings that are on both the pizzas on the menu. 
+
 #### Code
+```sql
+WITH cte_expand_toppings AS (
+	SELECT pizza_id, value AS topping
+	FROM pizza_recipes AS pr
+    CROSS APPLY STRING_SPLIT(toppings, ',')
+	)
+SELECT pt.topping_name
+FROM cte_expand_toppings AS c
+JOIN pizza_toppings AS pt ON c.topping = pt.topping_id
+GROUP BY pt.topping_name
+HAVING COUNT(DISTINCT c.pizza_id) = 2;
+```
 #### Results
+| topping_name  |
+|---------------|
+| Cheese	    |
+| Mushrooms	    |
+
 ### 2. What was the most commonly added extra?
 #### Explanation
 #### Code
