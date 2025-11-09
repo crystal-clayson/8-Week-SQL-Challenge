@@ -376,11 +376,12 @@ FROM runner_orders;
 
 ### 6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
 #### Explanation
+This question just needs a speed calculation using the ```distance``` and ```duration``` from the ```runner_orders``` table.
 #### Code
 ```sql
 SELECT runner_id, order_id, ROUND(distance/(duration/60),2) AS avg_km_hr
 FROM runner_orders
-ORDER BY runner_id, pickup_time;
+ORDER BY runner_id, order_id;
 ```
 #### Results
 runner_id	order_id	avg_km_hr
