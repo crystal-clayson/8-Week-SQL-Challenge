@@ -384,22 +384,36 @@ FROM runner_orders
 ORDER BY runner_id, order_id;
 ```
 #### Results
-runner_id	order_id	avg_km_hr
-1	1	37.5000000000
-1	2	44.4400000000
-1	3	40.2000000000
-1	10	60.0000000000
-2	4	35.1000000000
-2	7	60.0000000000
-2	8	93.6000000000
-2	9	NULL
-3	5	40.0000000000
-3	6	NULL
+| runner_id | order_id | avg_km_hr |
+|-----------|----------|-----------|
+| 1         | 1        | 37.50     |
+| 1	        | 2        | 44.44     |
+| 1	        | 3        | 40.20     |
+| 1	        | 10	   | 60.00     |
+| 2         | 4        | 35.10     |
+| 2         | 7        | 60.00     |
+| 2	        | 8        | 93.60     |
+| 2	        | 9        | NULL      |
+| 3	        | 5        | 40.00     |
+| 3	        | 6        | NULL      |
 
 ### 7. What is the successful delivery percentage for each runner?
 #### Explanation
+Fore each runner, this code calculates the percentage of completed orders out of the total orders assigned.
 #### Code
+```sql
+SELECT runner_id, 
+	COUNT(CASE WHEN cancellation = '' THEN 1 END)*1.00/COUNT(*)*100.00 AS success_rate
+FROM runner_orders
+GROUP BY runner_id
+ORDER BY runner_id;
+```
 #### Results
+| runner_id | success_rate |
+|-----------|--------------|
+| 1         | 100.00       |
+| 2         | 75.00        |
+| 3         | 50.00        |
 
 ## C. Ingredient Optimisation
 ### 1. What are the standard ingredients for each pizza?
