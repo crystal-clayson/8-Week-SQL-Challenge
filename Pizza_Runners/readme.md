@@ -318,8 +318,31 @@ GROUP BY lt.runner_id;
 
 ### 3. Is there any relationship between the number of pizzas and how long the order takes to prepare?
 #### Explanation
+
 #### Code
-#### Results
+```sql
+WWITH cte_count AS (
+	SELECT order_id, order_time, COUNT(pizza_id) AS quantity
+	FROM customer_orders
+	GROUP BY order_id, order_time
+    )
+SELECT quantity,
+	AVG(CAST(DATEDIFF(MINUTE, order_time, pickup_time) AS FLOAT)) AS avg_preptime,
+	AVG(CAST(DATEDIFF(MINUTE, order_time, pickup_time) AS FLOAT))/quantity AS avg_per_pizza
+FROM cte_count AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id
+WHERE cancellation = ''
+GROUP BY quantity
+ORDER BY quantity;
+```
+#### 
+| quantity | avg_prep_time | avg_per_pizza |
+|----------|---------------|---------------|
+| 1        | 12.2          | 12.2          |
+| 2        | 18.5          | 9.25          |
+| 3        | 30            | 10            |
+
+
 ### 4. What was the average distance travelled for each customer?
 #### Explanation
 #### Code
