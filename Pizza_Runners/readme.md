@@ -362,6 +362,7 @@ GROUP BY customer_id;
 
 ### 5. What was the difference between the longest and shortest delivery times for all orders?
 #### Explanation
+This query will find the shortest and longest ```duration```, and calculate the difference.
 #### Code
 ```sql
 SELECT min(duration) AS shortest, 
@@ -377,7 +378,24 @@ FROM runner_orders;
 ### 6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
 #### Explanation
 #### Code
+```sql
+SELECT runner_id, order_id, ROUND(distance/(duration/60),2) AS avg_km_hr
+FROM runner_orders
+ORDER BY runner_id, pickup_time;
+```
 #### Results
+runner_id	order_id	avg_km_hr
+1	1	37.5000000000
+1	2	44.4400000000
+1	3	40.2000000000
+1	10	60.0000000000
+2	4	35.1000000000
+2	7	60.0000000000
+2	8	93.6000000000
+2	9	NULL
+3	5	40.0000000000
+3	6	NULL
+
 ### 7. What is the successful delivery percentage for each runner?
 #### Explanation
 #### Code
