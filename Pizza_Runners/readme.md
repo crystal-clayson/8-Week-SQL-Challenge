@@ -296,14 +296,13 @@ ORDER BY DATEPART(wk, registration_date);
 
 ### 2. What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
 #### Explanation
-
+We need to use a subquery to select the unique ```order_id``` and ```customer_id``` pairs, then calculate the average of the difference between the ```order_time``` and ```pickup_time```.
 #### Code
 ```sql
 SELECT ro.runner_id, AVG(DATEDIFF(MINUTE, co.order_time, ro.pickup_time)) AS leadtime
 FROM (SELECT DISTINCT order_id, customer_id, order_time FROM customer_orders) AS co
 JOIN runner_orders AS ro ON co.order_id = ro.order_id
 GROUP BY ro.runner_id;
-
 ```
 #### Results
 | runner_id | avg_leadtime |
