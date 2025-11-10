@@ -487,13 +487,9 @@ ORDER BY COUNT(*) DESC;
 - Meat Lovers - Extra Bacon
 - Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers
 #### Explanation
-
+The solution needs to handle orders with multiple identical items, such as order 4. We'll accomplish this by assigning each pizza in the ```customer_orders``` table a unique identifier using ```ROW_NUMBER```, with results stored in a CTE. Next, we'll create a pair of CTE's (one each for exclusions and extras) that first expand the comma separated ```exclusions``` and ```extras``` lissts of topping id's, then aggregate them back into lists of topping names. With these CTE's created, we will join them all together on the newly created ```pizza_number```, and join the ```pizza_names``` table on the ```pizza_id```. Finally, we'll use a ```CASE WHEN``` statement to account for every combination of exclusions and/or/nor extras with a ```CONCAT``` clause to bring together the parts of the requested order items. 
 #### Code
 ```sql
-UPDATE pizza_names
-SET pizza_name = 'Meat Lovers'
-WHERE pizza_name = 'Meatlovers';
-
 WITH cte_customer_orders AS (
 	SELECT 
 		order_id, 
