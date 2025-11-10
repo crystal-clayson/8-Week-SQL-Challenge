@@ -86,6 +86,7 @@ UPDATE pizza_names
 SET pizza_name = 'Meat Lovers'
 WHERE pizza_name = 'Meatlovers';
 ```
+![Clean pizza_names table](/images/p_r_0_5.png)
 
 The remainder of the tables appear ready to use.
 ```sql
@@ -93,7 +94,8 @@ SELECT * FROM runners;
 SELECT * FROM pizza_recipes;
 SELECT * FROM pizza_toppings;
 ```
-![runners, pizza_names, pizza_recipes, and pizza_toppings tables](/images/p_r_0_5.png)
+
+
 
 ## A. Pizza Metrics
 ### 1. How many pizzas were ordered?
