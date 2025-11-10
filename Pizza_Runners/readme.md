@@ -8,8 +8,6 @@
   * [D. Pricing and Ratings](#d-pricing-and-ratings)
   * [E. Menu Expansion](#e-menu-expansion)
 
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
 # Case Study - Pizza Runners
 
 ## Business Task
