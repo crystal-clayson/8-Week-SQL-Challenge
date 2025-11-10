@@ -424,37 +424,16 @@ As a reminder, the ```pizza_recipes``` table lists the toppings in a string of t
 | 1        | 1, 2, 3, 4, 5, 6, 8, 10 |
 | 2        | 4, 6, 7, 9, 11, 12      |
 
-The first task to answer this question is to expand these comma separated strings and ```CROSS APPLY``` them to the ```pizza_id``` column. A CTE is created with this information, as follows.
-| pizza_id | topping |
-|----------|---------|
-| 1	       | 1       |
-| 1	       | 2       |
-| 1	       | 3       |
-| 1	       | 4       |
-| 1	       | 5       |
-| 1	       | 6       |
-| 1	       | 8       |
-| 1	       | 10      |
-| 2	       | 4       |
-| 2	       | 6       |
-| 2	       | 7       |
-| 2	       | 9       |
-| 2	       | 11      |
-| 2	       | 12      |
-Next, this CTE is joined with the ```pizza_toppings``` table to bring in the topping names, for clarity. Finally, we add a ```HAVING``` clause to return only the toppings that are on both the pizzas on the menu. 
+The first task to answer this question is to expand these comma separated strings and ```CROSS APPLY``` them to the ```pizza_id``` column. Next, the result is joined with the ```pizza_toppings``` table to bring in the topping names, for clarity, grouped by ```topping_name```, and ordered by the count of each group. Finally, we add a ```TOP 1 WITH TIES``` clause to the ```SELECT``` statement to select only the top results. 
 
 #### Code
 ```sql
-WITH cte_expand_toppings AS (
-	SELECT pizza_id, value AS topping
-	FROM pizza_recipes AS pr
-    CROSS APPLY STRING_SPLIT(toppings, ',')
-	)
-SELECT pt.topping_name
-FROM cte_expand_toppings AS c
-JOIN pizza_toppings AS pt ON c.topping = pt.topping_id
+SELECT TOP 1 WITH TIES pt.topping_name
+FROM pizza_recipes
+CROSS APPLY string_split(toppings, ',') AS ss
+JOIN pizza_toppings AS pt ON ss.value = pt.topping_id
 GROUP BY pt.topping_name
-HAVING COUNT(DISTINCT c.pizza_id) = 2;
+ORDER BY COUNT(*) DESC
 ```
 #### Results
 | topping_name  |
@@ -467,17 +446,13 @@ HAVING COUNT(DISTINCT c.pizza_id) = 2;
 Similarly to the previous question, the ```extras``` column in the ```customer_orders``` table is in a comma separated string with the topping id's. We need to use ```CROSS APPLY``` again to break those strings into useable values. After that, we'll ```JOIN``` to the ```pizza_toppings``` so we can use the topping name in the results, and group by ```topping_name```, order by the ```COUNT``` of each group, then select the topping name with the highest count.
 #### Code
 ```sql
-WITH cte_expanded_extras AS (
-	SELECT value AS extra
-	FROM customer_orders
-	CROSS APPLY string_split(extras, ',')
-	WHERE extras != ''
-	)
-SELECT TOP 1 pt.topping_name
-FROM cte_expanded_extras AS c
-JOIN pizza_toppings AS pt ON c.extra = pt.topping_id
+SELECT TOP 1 WITH TIES pt.topping_name , COUNT(*) AS excl_count
+FROM customer_orders
+CROSS APPLY string_split(exclusions, ',') AS ss
+JOIN pizza_toppings AS pt ON pt.topping_id = ss.value
 GROUP BY pt.topping_name
-ORDER BY COUNT(*) DESC; 
+ORDER BY COUNT(*) DESC;
+
 ```
 #### Results
 | topping_name |
@@ -489,15 +464,10 @@ ORDER BY COUNT(*) DESC;
 This question is answered in nearly the same way as the previous question, but looking at the ```exclustions``` column in the ```customer_orders``` table.
 #### Code
 ```sql
-WITH cte_expanded_exclusions AS (
-	SELECT value AS excluded
-	FROM customer_orders
-	CROSS APPLY string_split(exclusions, ',')
-	WHERE exclusions != ''
-	)
-SELECT TOP 1 pt.topping_name
-FROM cte_expanded_exclusions AS c
-JOIN pizza_toppings AS pt ON c.excluded = pt.topping_id
+SELECT TOP 1 WITH TIES pt.topping_name , COUNT(*) AS excl_count
+FROM customer_orders
+CROSS APPLY string_split(exclusions, ',') AS ss
+JOIN pizza_toppings AS pt ON pt.topping_id = ss.value
 GROUP BY pt.topping_name
 ORDER BY COUNT(*) DESC;
 ```
