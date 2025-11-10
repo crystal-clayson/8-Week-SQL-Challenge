@@ -464,12 +464,48 @@ HAVING COUNT(DISTINCT c.pizza_id) = 2;
 
 ### 2. What was the most commonly added extra?
 #### Explanation
+Similarly to the previous question, the ```extras``` column in the ```customer_orders``` table is in a comma separated string with the topping id's. We need to use ```CROSS APPLY``` again to break those strings into useable values. After that, we'll ```JOIN``` to the ```pizza_toppings``` so we can use the topping name in the results, and group by ```topping_name```, order by the ```COUNT``` of each group, then select the topping name with the highest count.
 #### Code
+```sql
+WITH cte_expanded_extras AS (
+	SELECT value AS extra
+	FROM customer_orders
+	CROSS APPLY string_split(extras, ',')
+	WHERE extras != ''
+	)
+SELECT TOP 1 pt.topping_name
+FROM cte_expanded_extras AS c
+JOIN pizza_toppings AS pt ON c.extra = pt.topping_id
+GROUP BY pt.topping_name
+ORDER BY COUNT(*) DESC; 
+```
 #### Results
+| topping_name |
+|--------------|
+| Bacon        |
+
 ### 3. What was the most common exclusion?
 #### Explanation
+This question is answered in nearly the same way as the previous question, but looking at the ```exclustions``` column in the ```customer_orders``` table.
 #### Code
+```sql
+WITH cte_expanded_exclusions AS (
+	SELECT value AS excluded
+	FROM customer_orders
+	CROSS APPLY string_split(exclusions, ',')
+	WHERE exclusions != ''
+	)
+SELECT TOP 1 pt.topping_name
+FROM cte_expanded_exclusions AS c
+JOIN pizza_toppings AS pt ON c.excluded = pt.topping_id
+GROUP BY pt.topping_name
+ORDER BY COUNT(*) DESC;
+```
 #### Results
+| topping_name |
+|--------------|
+| Cheese       |
+
 ### 4. Generate an order item for each record in the customers_orders table in the format of one of the following:
 - Meat Lovers
 - Meat Lovers - Exclude Beef
