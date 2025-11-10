@@ -399,7 +399,7 @@ ORDER BY runner_id, order_id;
 
 ### 7. What is the successful delivery percentage for each runner?
 #### Explanation
-Fore each runner, this code calculates the percentage of completed orders out of the total orders assigned.
+For each runner, this code calculates the percentage of completed orders out of the total orders assigned.
 #### Code
 ```sql
 SELECT runner_id, 
