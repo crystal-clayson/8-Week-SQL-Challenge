@@ -94,8 +94,7 @@ SELECT * FROM runners;
 SELECT * FROM pizza_recipes;
 SELECT * FROM pizza_toppings;
 ```
-
-
+![runners, pizza_recipes, pizza_toppings tables](/images/p_r_0_6.png)
 
 ## A. Pizza Metrics
 ### 1. How many pizzas were ordered?
