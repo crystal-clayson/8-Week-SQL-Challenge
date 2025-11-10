@@ -7,4 +7,4 @@ Thanks to [Data With Danny](https://8weeksqlchallenge.com/) for the resources, i
 | Case Study    | Demonstrated Skills                                |
 |---------------|----------------------------------------------------|
 | Danny's Diner | COUNT, SUM, JOIN, CTE, RANK, DENSE_RANK, CASE WHEN |
-| Pizza Runners | Data cleaning, DATE functions, CROSS APPLY         |
+| Pizza Runners | Data cleaning, DATE functions, CROSS APPLY, string_split |
