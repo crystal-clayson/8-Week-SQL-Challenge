@@ -811,7 +811,7 @@ SELECT * FROM pizza_recipes;
 | 2	       | 4, 6, 7, 9, 11, 12         |
 | 3	       | 1,2,3,4,5,6,7,8,9,10,11,12 |
 
-### 2. Add prices to the pizza_names table and rewrite the code for Section D 1, 2, & 5.
+### 2. Add prices to the pizza_names table and rewrite the code for Section D 1, 2, 4, & 5.
 #### Explanation
 The first step is to add a price column in the ```pizza_names``` table and set the prices for each pizza.
 ```sql
@@ -863,18 +863,19 @@ WHERE ro.cancellation ='';
 |----------------|
 | 144.00         |
 
-#### 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
-SELECT SUM(pn.price)-SUM(ro.distance)*0.30 AS left_over
-FROM customer_orders AS co
-JOIN runner_orders AS ro ON co.order_id = ro.order_id
-JOIN pizza_names AS pn ON co.pizza_id = pn.pizza_id
-WHERE ro.cancellation = '';
-
-| left_over |
-|-----------|
-| 73.38     |
-
-We can also now add an ```order_total``` column to the table created in D4.
+### 4. Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
+- customer_id
+- order_id
+- runner_id
+- rating
+- order_time
+- pickup_time
+- Time between order and pickup
+- Delivery duration
+- Average speed
+- Total number of pizzas
+- Order total
+We'll put the ```order_total``` calculation in the CTE with the ```total_pizzas``` calculation.
 ```sql
 WITH cte_total AS (
 	SELECT co.order_id, 
@@ -910,6 +911,19 @@ WHERE ro.cancellation = '';
 | 7        | 105		 | 2		 | 5	  | 2020-01-08 21:20:29.000	| 2020-01-08 21:30:45	| 10	| 25.0	| 1.000000	| 1 | 10.00 |
 | 8        | 102		 | 2		 | 4	  | 2020-01-09 23:54:33.000	| 2020-01-10 00:15:02	| 21	| 15.0	| 1.560000	| 1 | 12.00 |
 | 10       | 104		 | 1		 | 1	  | 2020-01-11 18:34:49.000	| 2020-01-11 18:50:20	| 16	| 10.0	| 1.000000	| 2 | 24.00 |
+
+
+#### 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
+SELECT SUM(pn.price)-SUM(ro.distance)*0.30 AS left_over
+FROM customer_orders AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id
+JOIN pizza_names AS pn ON co.pizza_id = pn.pizza_id
+WHERE ro.cancellation = '';
+
+| left_over |
+|-----------|
+| 73.38     |
+
 
 
 
