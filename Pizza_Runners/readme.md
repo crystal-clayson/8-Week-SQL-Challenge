@@ -1,3 +1,4 @@
+# Table of Contents
 - [Case Study - Pizza Runners](#case-study---pizza-runners)
   * [Business Task](#business-task)
   * [Data Overview](#data-overview)
