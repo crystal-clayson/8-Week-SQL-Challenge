@@ -679,7 +679,7 @@ FROM customer_orders;
 
 ### 3. The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
 #### Explanation
-The new table needs columns for ```runner_id```, ```order_id```, and ```rating```, as well as a foreign key relating the new table to the ```runners``` table. To populate the table, values are pulled from the ```runner_orders``` table, with cancelled orders filtered out.
+The new table needs columns for ```runner_id```, ```order_id```, and ```rating```, as well as a foreign key relating the new table to the ```runner_orders``` table. To populate the table, values are pulled from the ```runner_orders``` table, with cancelled orders filtered out.
 
 Okay, coming out of the hypothetical situation here, rather than pick ratings for each order, I assigned a random integer between 1 and 5. This solution will still work if more orders are added to the table. 
 #### Code
@@ -689,8 +689,8 @@ CREATE TABLE runner_ratings (
   runner_id INTEGER,
   order_id INTEGER,
   rating INTEGER,
-  CONSTRAINT FK__runner_ratings__runners_orders FOREIGN KEY (runner_id)
-	REFERENCES runners_orders(runner_id)
+  CONSTRAINT FK__runner_ratings__runner_orders FOREIGN KEY (order_id)
+	REFERENCES runner_orders(order_id)
 );
 INSERT INTO runner_ratings
   (runner_id, order_id, rating)
