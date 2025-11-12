@@ -710,6 +710,9 @@ SELECT * FROM runner_ratings;
 | 2			| 9			| 4 	|
 | 1			| 10 		| 5 	|
 
+The database relationship diagram now has an additional table.
+![Updated database relationship diagram including runner_ratings table](/images/p_r_0_7.png)
+
 ### 4. Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
 - customer_id
 - order_id
