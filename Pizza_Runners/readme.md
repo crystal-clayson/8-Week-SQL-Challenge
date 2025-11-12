@@ -832,7 +832,7 @@ SET price = CASE
 | 3        | Supreme     | 14    |
 
 Now, we will revisit previous questions. We have not yet added any orders with the new pizza, so we expect to get the same answers.
-### 1. If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
+#### 1. If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
 We'll need to add a join to the ```pizza_names``` table, but then the revenue calculation will be a simple sum instead of the ```COUNT CASE WHEN```.
 ```sql
 SELECT SUM(pn.price) AS total_revenue
@@ -845,7 +845,7 @@ WHERE ro.cancellation ='';
 |---------------|
 | 138.00        |
 
-### 2. What if there was an additional $1 charge for any pizza extras? $166
+#### 2. What if there was an additional $1 charge for any pizza extras? $166
 - Add cheese is $1 extra
 The changes here are pretty much the same.
 ```sql
@@ -863,7 +863,7 @@ WHERE ro.cancellation ='';
 |----------------|
 | 144.00         |
 
-### 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
+#### 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
 SELECT SUM(pn.price)-SUM(ro.distance)*0.30 AS left_over
 FROM customer_orders AS co
 JOIN runner_orders AS ro ON co.order_id = ro.order_id
@@ -874,7 +874,42 @@ WHERE ro.cancellation = '';
 |-----------|
 | 73.38     |
 
-
+We can also now add an ```order_total``` column to the table created in D4.
+```sql
+WITH cte_total AS (
+	SELECT co.order_id, 
+		COUNT(*) AS total_pizzas,
+		SUM(price) AS order_total
+	FROM customer_orders AS co
+	JOIN pizza_names AS pn ON co.pizza_id = pn.pizza_id
+	GROUP BY co.order_id)
+SELECT DISTINCT co.order_id, 
+	co.customer_id, 
+	ro.runner_id, 
+	rr.rating, 
+	co.order_time, 
+	ro.pickup_time,
+	DATEDIFF(MINUTE, co.order_time, ro.pickup_time) AS prep_time, 
+	ro.duration,
+	ro.distance/ro.duration AS avg_speed,
+	ct.total_pizzas,
+	ct.order_total
+FROM customer_orders AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id
+JOIN runner_ratings AS rr ON ro.order_id = rr.order_id
+JOIN cte_total AS ct on ro.order_id = ct.order_id
+WHERE ro.cancellation = '';
+```
+| order_id | customer_id | runner_id | rating | order_time | pickup_time | prep_time | duration | avg_speed | total_pizzas | order_total |
+|----------|-------------|-----------|--------|------------|-------------|-----------|----------|-----------|--------------|-------------|
+| 1        | 101		 | 1		 | 5	  | 2020-01-01 18:05:02.000	| 2020-01-01 18:15:34	| 10	| 32.0	| 0.625000	| 1 | 12.00 |
+| 2        | 101		 | 1		 | 1	  | 2020-01-01 19:00:52.000	| 2020-01-01 19:10:54	| 10	| 27.0	| 0.740740	| 1 | 12.00 |
+| 3        | 102		 | 1		 | 2	  | 2020-01-02 23:51:23.000	| 2020-01-03 00:12:37	| 21	| 20.0	| 0.670000	| 2 | 22.00 |
+| 4        | 103		 | 2		 | 1	  | 2020-01-04 13:23:46.000	| 2020-01-04 13:53:03	| 30	| 40.0	| 0.585000	| 3 | 34.00 |
+| 5        | 104		 | 3		 | 1	  | 2020-01-08 21:00:29.000	| 2020-01-08 21:10:57	| 10	| 15.0	| 0.666666	| 1 | 12.00 |
+| 7        | 105		 | 2		 | 5	  | 2020-01-08 21:20:29.000	| 2020-01-08 21:30:45	| 10	| 25.0	| 1.000000	| 1 | 10.00 |
+| 8        | 102		 | 2		 | 4	  | 2020-01-09 23:54:33.000	| 2020-01-10 00:15:02	| 21	| 15.0	| 1.560000	| 1 | 12.00 |
+| 10       | 104		 | 1		 | 1	  | 2020-01-11 18:34:49.000	| 2020-01-11 18:50:20	| 16	| 10.0	| 1.000000	| 2 | 24.00 |
 
 
 
