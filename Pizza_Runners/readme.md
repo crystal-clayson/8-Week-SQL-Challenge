@@ -740,8 +740,14 @@ WITH cte_total AS (
 	SELECT co.order_id, COUNT(pizza_id) AS total_pizzas
 	FROM customer_orders AS co
 	GROUP BY co.order_id)
-SELECT DISTINCT co.order_id, co.customer_id, ro.runner_id, rr.rating, co.order_time, ro.pickup_time,
-	DATEDIFF(MINUTE, co.order_time, ro.pickup_time) AS prep_time, ro.duration,
+SELECT DISTINCT co.order_id,
+	co.customer_id,
+	ro.runner_id,
+	rr.rating,
+	co.order_time,
+	ro.pickup_time,
+	DATEDIFF(MINUTE, co.order_time, ro.pickup_time) AS prep_time,
+	ro.duration,
 	ro.distance/ro.duration AS avg_speed,
 	ct.total_pizzas
 FROM customer_orders AS co
@@ -767,18 +773,20 @@ WHERE ro.cancellation = '';
 
 #### Code
 ```sql
-SELECT (SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12 
+SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12 
 		+ COUNT(CASE WHEN pizza_id = 2 THEN 1 END) * 10
-	FROM customer_orders)-(SELECT SUM(distance)*.30 FROM runner_orders) AS left_over;
+		-(SUM(distance)*.30) AS left_over
+FROM customer_orders AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id;
 ```
 #### Results
 | left_over |
 |-----------|
-| 116.440   |
+| 73.38     |
 ## E. Menu Expansion
 ### 1. If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
 #### Explanation
-We will write ```INSERT``` statements to add the new pizza id and name to the ```pizza_names``` table and add the new pizza id and toppings list to the ```pizza_recipes``` table. As orders for the new pizza come in and are added to the database, most of the queries previously written will still function as designed, as no references to pizza names, ids, or the number of menu items were hard-coded into most of the queries. The exceptions are the queries used to calculate total earnings, as the prices are hard-coded. This can be fixed by adding a column with prices to the ```pizza_names``` table.
+We will write ```INSERT``` statements to add the new pizza id and name to the ```pizza_names``` table and add the new pizza id and toppings list to the ```pizza_recipes``` table. As orders for the new pizza come in and are added to the database, most of the queries previously written will still function as designed, as no references to pizza names, ids, or the number of menu items were hard-coded into most of the queries. The exceptions are the queries used to calculate total earnings, as the prices are hard-coded. This can be fixed by adding a column with prices to the ```pizza_names``` table, and will be addressed below.
 #### Code
 ```sql
 INSERT INTO pizza_names (pizza_id, pizza_name)
@@ -802,3 +810,73 @@ SELECT * FROM pizza_recipes;
 | 1        | 1, 2, 3, 4, 5, 6, 8, 10    |
 | 2	       | 4, 6, 7, 9, 11, 12         |
 | 3	       | 1,2,3,4,5,6,7,8,9,10,11,12 |
+
+### 2. Add prices to the pizza_names table and rewrite the code for Section D 1, 2, & 5.
+#### Explanation
+The first step is to add a price column in the ```pizza_names``` table and set the prices for each pizza.
+```sql
+ALTER TABLE pizza_names
+ADD price DECIMAL(10,2);
+
+UPDATE pizza_names
+SET price = CASE
+				WHEN pizza_id = 1 THEN 12
+				WHEN pizza_id = 2 THEN 10
+				WHEN pizza_id = 3 THEN 14
+			END;
+```
+| pizza_id | pizza_name  | price |
+|----------|-------------|-------|
+| 1		   | Meat Lovers | 12    |
+| 2        | Vegetarian  | 10    |
+| 3        | Supreme     | 14    |
+
+Now, we will revisit previous questions. We have not yet added any orders with the new pizza, so we expect to get the same answers.
+### 1. If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
+We'll need to add a join to the ```pizza_names``` table, but then the revenue calculation will be a simple sum instead of the ```COUNT CASE WHEN```.
+```sql
+SELECT SUM(pn.price) AS total_revenue
+FROM customer_orders AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id
+JOIN pizza_names AS pn ON co.pizza_id = pn.pizza_id
+WHERE ro.cancellation ='';
+```
+| total_revenue |
+|---------------|
+| 138.00        |
+
+### 2. What if there was an additional $1 charge for any pizza extras? $166
+- Add cheese is $1 extra
+The changes here are pretty much the same.
+```sql
+SELECT SUM(pn.price) 
+	+ (SELECT COUNT(CASE WHEN VALUE != '' THEN 1 END)
+		FROM customer_orders
+		CROSS APPLY string_split(extras, ',')
+		) AS total_earnings
+FROM customer_orders AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id
+JOIN pizza_names AS pn ON co.pizza_id = pn.pizza_id
+WHERE ro.cancellation ='';
+```
+| total_earnings |
+|----------------|
+| 144.00         |
+
+### 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
+SELECT SUM(pn.price)-SUM(ro.distance)*0.30 AS left_over
+FROM customer_orders AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id
+JOIN pizza_names AS pn ON co.pizza_id = pn.pizza_id
+WHERE ro.cancellation = '';
+
+| left_over |
+|-----------|
+| 73.38     |
+
+
+
+
+
+
+
