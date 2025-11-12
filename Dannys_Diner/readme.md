@@ -1,6 +1,6 @@
 # Case Study - Danny's Dinner
 
-# Table of Contents
+## Table of Contents
 - [Business Task](#business-task)
 -  [Data Overview](#data-overview)
 -  [Case_Study_Questions](#case-study-questions)
