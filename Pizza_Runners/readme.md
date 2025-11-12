@@ -679,6 +679,9 @@ FROM customer_orders;
 
 ### 3. The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
 #### Explanation
+The new table needs columns for ```runner_id```, ```order_id```, and ```rating```, as well as a foreign key relating the new table to the ```runners``` table. To populate the table, values are pulled from the ```runner_orders``` table, with cancelled orders filtered out.
+
+Okay, coming out of the hypothetical situation here, rather than pick ratings for each order, I assigned a random integer between 1 and 5. This solution will still work if more orders are added to the table. 
 #### Code
 ```sql
 DROP TABLE IF EXISTS runner_ratings;
@@ -686,13 +689,14 @@ CREATE TABLE runner_ratings (
   runner_id INTEGER,
   order_id INTEGER,
   rating INTEGER,
-  CONSTRAINT FK__runner_ratings__runners FOREIGN KEY (runner_id)
-	REFERENCES runners(runner_id)
+  CONSTRAINT FK__runner_ratings__runners_orders FOREIGN KEY (runner_id)
+	REFERENCES runners_orders(runner_id)
 );
 INSERT INTO runner_ratings
   (runner_id, order_id, rating)
 SELECT runner_id, order_id,  FLOOR(RAND(CHECKSUM(NEWID())) * 5) + 1 
-FROM runner_orders;
+FROM runner_orders
+WHERE cancellation = '';
 
 SELECT * FROM runner_ratings;	
 ```
@@ -704,10 +708,8 @@ SELECT * FROM runner_ratings;
 | 1			| 3			| 4 	|
 | 2			| 4			| 1 	|
 | 3			| 5			| 3 	|
-| 3			| 6			| 2 	|
 | 2			| 7			| 5 	|
 | 2			| 8			| 1 	|
-| 2			| 9			| 4 	|
 | 1			| 10 		| 5 	|
 
 The database relationship diagram now has an additional table.
@@ -768,6 +770,7 @@ SELECT (SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12
 ## E. Menu Expansion
 ### 1. If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
 #### Explanation
+We will write ```INSERT``` statements to add the new pizza id and name to the ```pizza_names``` table and add the new pizza id and toppings list to the ```pizza_recipes``` table. As orders for the new pizza come in and are added to the database, all of the queries previously written will still function as designed, as no references to pizza names, ids, or the number of menu items were hard-coded into the queries. 
 #### Code
 ```sql
 INSERT INTO pizza_names (pizza_id, pizza_name)
