@@ -726,13 +726,68 @@ The database relationship diagram now has an additional table.
 - Total number of pizzas
 #### Explanation
 #### Code
+```sql
+WITH cte_total AS (
+	SELECT co.order_id, COUNT(pizza_id) AS total_pizzas
+	FROM customer_orders AS co
+	GROUP BY co.order_id)
+SELECT DISTINCT co.order_id, co.customer_id, ro.runner_id, rr.rating, co.order_time, ro.pickup_time,
+	DATEDIFF(MINUTE, co.order_time, ro.pickup_time) AS prep_time, ro.duration,
+	ro.distance/ro.duration AS avg_speed,
+	ct.total_pizzas
+FROM customer_orders AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id
+JOIN runner_ratings AS rr ON ro.order_id = rr.order_id
+JOIN cte_total AS ct on ro.order_id = ct.order_id
+WHERE ro.cancellation = '';
+```
 #### Results
+| order_id | customer_id | runner_id | rating | order_time | pickup_time | prep_time | duration | avg_speed | total_pizzas |
+|----------|-------------|-----------|--------|------------|-------------|-----------|----------|-----------|--------------|
+| 1        | 101		 | 1		 | 5	  | 2020-01-01 18:05:02.000	| 2020-01-01 18:15:34	| 10	| 32.0	| 0.625000	| 1 |
+| 2        | 101		 | 1		 | 1	  | 2020-01-01 19:00:52.000	| 2020-01-01 19:10:54	| 10	| 27.0	| 0.740740	| 1 |
+| 3        | 102		 | 1		 | 2	  | 2020-01-02 23:51:23.000	| 2020-01-03 00:12:37	| 21	| 20.0	| 0.670000	| 2 |
+| 4        | 103		 | 2		 | 1	  | 2020-01-04 13:23:46.000	| 2020-01-04 13:53:03	| 30	| 40.0	| 0.585000	| 3 |
+| 5        | 104		 | 3		 | 1	  | 2020-01-08 21:00:29.000	| 2020-01-08 21:10:57	| 10	| 15.0	| 0.666666	| 1 |
+| 7        | 105		 | 2		 | 5	  | 2020-01-08 21:20:29.000	| 2020-01-08 21:30:45	| 10	| 25.0	| 1.000000	| 1 |
+| 8        | 102		 | 2		 | 4	  | 2020-01-09 23:54:33.000	| 2020-01-10 00:15:02	| 21	| 15.0	| 1.560000	| 1 |
+| 10       | 104		 | 1		 | 1	  | 2020-01-11 18:34:49.000	| 2020-01-11 18:50:20	| 16	| 10.0	| 1.000000	| 2 |
+
 ### 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
 #### Explanation
 #### Code
+```sql
+SELECT (SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12 
+		+ COUNT(CASE WHEN pizza_id = 2 THEN 1 END) * 10
+	FROM customer_orders)-(SELECT SUM(distance)*.30 FROM runner_orders) AS left_over;
+```
 #### Results
+| left_over |
+|-----------|
+| 116.440   |
 ## E. Menu Expansion
 ### 1. If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
 #### Explanation
 #### Code
+```sql
+INSERT INTO pizza_names (pizza_id, pizza_name)
+VALUES ('3', 'Supreme');
+
+INSERT INTO pizza_recipes (pizza_id, toppings)
+VALUES ('3', '1,2,3,4,5,6,7,8,9,10,11,12');
+
+SELECT * FROM pizza_names;
+SELECT * FROM pizza_recipes;
+```
 #### Results
+| pizza_id | pizza_name  |
+|----------|-------------|
+| 1		   | Meat Lovers |
+| 2        | Vegetarian  |
+| 3        | Supreme     |
+
+| pizza_id | toppings |
+|----------|----------|
+| 1        | 1, 2, 3, 4, 5, 6, 8, 10    |
+| 2	       | 4, 6, 7, 9, 11, 12         |
+| 3	       | 1,2,3,4,5,6,7,8,9,10,11,12 |
