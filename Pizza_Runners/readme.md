@@ -11,7 +11,7 @@
 # Case Study - Pizza Runners
 
 ## Business Task
-After the success of his Japanese eatery, Danny has now opened a pizza delivery business. He ahs recruited runners to deliver pizzas from Pizza Runner Headquarters. Danny has gathered data regarding orders and needs us to clean and analyze the data to optimise operations.
+After the success of his Japanese eatery, Danny has now opened a pizza delivery business. He has recruited runners to deliver pizzas from Pizza Runner Headquarters. Danny has gathered data regarding orders and needs us to clean and analyze the data to optimise operations.
 
 ## Data Overview
 The data comprises six tables. The ```runners``` table lists the ```runner_id``` and ```registration_date``` for each runner. The ```customer_orders``` table details each order, with a row for each pizza in the order. The ```pizza_id``` relates to the type of pizza which was ordered whilst the exclusions are the ```ingredient_id values``` which should be removed from the pizza and the ```extras``` are the ```ingredient_id``` values which need to be added to the pizza. This table also includes the ```order_time``` timestamp.
