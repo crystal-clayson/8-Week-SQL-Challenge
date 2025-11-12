@@ -7,4 +7,5 @@ Thanks to [Data With Danny](https://8weeksqlchallenge.com/) for the resources, i
 | Case Study    | Demonstrated Skills                                |
 |---------------|----------------------------------------------------|
 | Danny's Diner | COUNT, SUM, JOIN, CTE, RANK, DENSE_RANK, CASE WHEN |
-| Pizza Runners | Data Cleaning, DATE Functions, CROSS APPLY, string_split, Subqueries, CREATE, INSERT, ALTER, UPDATE, SET, Relationship Diagram Creation |
+| Pizza Runners | Data Cleaning, DATE Functions, CROSS APPLY, string_split, Subqueries, CREATE, INSERT, ALTER, UPDATE, SET, Primary & Foreign Keys, Relationship Diagram Creation |
+| Foodie Fi     | BULK INSERT from CTE |
