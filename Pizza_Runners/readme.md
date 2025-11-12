@@ -609,7 +609,41 @@ ORDER BY c1.pizza_number;
 ### 6. What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
 #### Explanation
 #### Code
+```sql
+WITH cte AS (
+	SELECT co.pizza_id,
+		CASE WHEN extras != ''
+		THEN CONCAT(CASE WHEN exclusions != '' 
+				THEN REPLACE(toppings, exclusions + ', ', '')
+				ELSE toppings
+			END, ', ', co.extras) 
+		ELSE toppings
+		END AS a
+		FROM customer_orders co
+		JOIN pizza_recipes pr ON co.pizza_id = pr.pizza_id 
+)
+SELECT topping_name, COUNT(topping_name) AS quantity
+FROM cte
+CROSS APPLY string_split(a, ',') as ss
+JOIN pizza_toppings AS pt ON ss.value = pt.topping_id
+GROUP BY topping_name
+ORDER BY COUNT(topping_name) DESC;
+```
 #### Results
+| topping_name	| quantity |
+|---------------|----------|
+| Bacon	| 14 |
+| Cheese	| 14 |
+| Mushrooms	| 14 |
+| Chicken	| 11 |
+| BBQ Sauce	| 10 |
+| Beef	| 10 |
+| Pepperoni	| 10 |
+| Salami	| 10 |
+| Tomato Sauce	| 4 |
+| Tomatoes	| 4 |
+| Peppers	| 4 |
+| Onions	| 4 |
 
 ## D. Pricing and Ratings
 ### 1. If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
