@@ -649,16 +649,67 @@ ORDER BY COUNT(topping_name) DESC;
 ### 1. If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
 #### Explanation
 #### Code
+```sql
+SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12 
+	+ COUNT(CASE WHEN pizza_id = 2 THEN 1 END) * 10 AS total_earnings
+FROM customer_orders;
+```
 #### Results
+| total_earnings |
+|----------------|
+| 160            |
+
 ### 2. What if there was an additional $1 charge for any pizza extras?
 - Add cheese is $1 extra
 #### Explanation
 #### Code
+```sql
+SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12 
+	+ COUNT(CASE WHEN pizza_id = 2 THEN 1 END) * 10 
+	+ (SELECT COUNT(CASE WHEN VALUE != '' THEN 1 END)
+		FROM customer_orders
+		CROSS APPLY string_split(extras, ',')
+		) AS total_earnings
+FROM customer_orders;
+```
 #### Results
+| total_earnings |
+|----------------|
+| 166            |
+
 ### 3. The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
 #### Explanation
 #### Code
+```sql
+DROP TABLE IF EXISTS runner_ratings;
+CREATE TABLE runner_ratings (
+  runner_id INTEGER,
+  order_id INTEGER,
+  rating INTEGER,
+  CONSTRAINT FK__runner_ratings__runners FOREIGN KEY (runner_id)
+	REFERENCES runners(runner_id)
+);
+INSERT INTO runner_ratings
+  (runner_id, order_id, rating)
+SELECT runner_id, order_id,  FLOOR(RAND(CHECKSUM(NEWID())) * 5) + 1 
+FROM runner_orders;
+
+SELECT * FROM runner_ratings;	
+```
 #### Results
+| runner_id | order_id | rating |
+|-----------|----------|--------|
+| 1			| 1			| 3 	|
+| 1			| 2			| 5 	|
+| 1			| 3			| 4 	|
+| 2			| 4			| 1 	|
+| 3			| 5			| 3 	|
+| 3			| 6			| 2 	|
+| 2			| 7			| 5 	|
+| 2			| 8			| 1 	|
+| 2			| 9			| 4 	|
+| 1			| 10 		| 5 	|
+
 ### 4. Using your newly generated table - can you join all of the information together to form a table which has the following information for successful deliveries?
 - customer_id
 - order_id
