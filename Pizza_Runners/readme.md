@@ -648,20 +648,24 @@ ORDER BY COUNT(topping_name) DESC;
 ## D. Pricing and Ratings
 ### 1. If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
 #### Explanation
+Pizza Runners will give a full refund for cancelled orders, so we'll join the ```customer_orders``` and ```runner_orders``` to get both the pizzas ordered and cancellation status. Then, we'll count the number of each type of pizza delivered and multiply by the respective price.
 #### Code
 ```sql
 SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12 
 	+ COUNT(CASE WHEN pizza_id = 2 THEN 1 END) * 10 AS total_earnings
-FROM customer_orders;
+FROM customer_orders AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id
+WHERE ro.cancellation ='';
 ```
 #### Results
 | total_earnings |
 |----------------|
-| 160            |
+| 138            |
 
 ### 2. What if there was an additional $1 charge for any pizza extras?
 - Add cheese is $1 extra
 #### Explanation
+We'll again join the ```customer_orders``` and ```runner_orders``` to get both the pizzas ordered and cancellation status, so we can filter out cancelled orders. Then, we'll count the number of each type of pizza delivered and multiply by the respective price and add a count of all extras using a subquery and string_split operation.
 #### Code
 ```sql
 SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12 
@@ -670,12 +674,14 @@ SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12
 		FROM customer_orders
 		CROSS APPLY string_split(extras, ',')
 		) AS total_earnings
-FROM customer_orders;
+FROM customer_orders AS co
+JOIN runner_orders AS ro ON co.order_id = ro.order_id
+WHERE ro.cancellation ='';
 ```
 #### Results
 | total_earnings |
 |----------------|
-| 166            |
+| 144            |
 
 ### 3. The Pizza Runner team now wants to add an additional ratings system that allows customers to rate their runner, how would you design an additional table for this new dataset - generate a schema for this new table and insert your own data for ratings for each successful customer order between 1 to 5.
 #### Explanation
@@ -727,6 +733,7 @@ The database relationship diagram now has an additional table.
 - Average speed
 - Total number of pizzas
 #### Explanation
+The requested table requires multiple joins to pull the required data from its respective tables. We'll also use a CTE to get the total number of pizzas per order.
 #### Code
 ```sql
 WITH cte_total AS (
@@ -757,6 +764,7 @@ WHERE ro.cancellation = '';
 
 ### 5. If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
 #### Explanation
+
 #### Code
 ```sql
 SELECT (SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12 
@@ -770,7 +778,7 @@ SELECT (SELECT COUNT(CASE WHEN pizza_id = 1 THEN 1 END) * 12
 ## E. Menu Expansion
 ### 1. If Danny wants to expand his range of pizzas - how would this impact the existing data design? Write an INSERT statement to demonstrate what would happen if a new Supreme pizza with all the toppings was added to the Pizza Runner menu?
 #### Explanation
-We will write ```INSERT``` statements to add the new pizza id and name to the ```pizza_names``` table and add the new pizza id and toppings list to the ```pizza_recipes``` table. As orders for the new pizza come in and are added to the database, all of the queries previously written will still function as designed, as no references to pizza names, ids, or the number of menu items were hard-coded into the queries. 
+We will write ```INSERT``` statements to add the new pizza id and name to the ```pizza_names``` table and add the new pizza id and toppings list to the ```pizza_recipes``` table. As orders for the new pizza come in and are added to the database, most of the queries previously written will still function as designed, as no references to pizza names, ids, or the number of menu items were hard-coded into most of the queries. The exceptions are the queries used to calculate total earnings, as the prices are hard-coded. This can be fixed by adding a column with prices to the ```pizza_names``` table.
 #### Code
 ```sql
 INSERT INTO pizza_names (pizza_id, pizza_name)
