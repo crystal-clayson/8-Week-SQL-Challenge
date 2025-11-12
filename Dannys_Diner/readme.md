@@ -1,11 +1,10 @@
-# Table of Contents
-- [Case Study - Danny's Diner](#case-study---danny's-diner)
-  * [Business Task](#business-task)
-  * [Data Overview](#data-overview)
-  * [Case_Study_Questions](#case-study-questions)
-    
 # Case Study - Danny's Dinner
 
+# Table of Contents
+- [Business Task](#business-task)
+-  [Data Overview](#data-overview)
+-  [Case_Study_Questions](#case-study-questions)
+    
 ## Business Task
 Danny’s Diner, a new Japanese restaurant, has asked for assistance in using customer data to help them run the business, and has provided a sample of customer data to work with. The stakeholders have asked for SQL queries to answer a series of questions. 
 
