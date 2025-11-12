@@ -1,15 +1,14 @@
-# Table of Contents
-- [Case Study - Pizza Runners](#case-study---pizza-runners)
-  * [Business Task](#business-task)
-  * [Data Overview](#data-overview)
-  * [Data Cleaning](#data-cleaning)
-  * [A. Pizza Metrics](#a-pizza-metrics)
-  * [B. Runner and Customer Experience](#b-runner-and-customer-experience)
-  * [C. Ingredient Optimisation](#c-ingredient-optimisation)
-  * [D. Pricing and Ratings](#d-pricing-and-ratings)
-  * [E. Menu Expansion](#e-menu-expansion)
-
 # Case Study - Pizza Runners
+
+## Table of Contents
+- [Business Task](#business-task)
+- [Data Overview](#data-overview)
+- [Data Cleaning](#data-cleaning)
+- [A. Pizza Metrics](#a-pizza-metrics)
+- [B. Runner and Customer Experience](#b-runner-and-customer-experience)
+- [C. Ingredient Optimisation](#c-ingredient-optimisation)
+- [D. Pricing and Ratings](#d-pricing-and-ratings)
+- [E. Menu Expansion](#e-menu-expansion)
 
 ## Business Task
 After the success of his Japanese eatery, Danny has now opened a pizza delivery business. He has recruited runners to deliver pizzas from Pizza Runner Headquarters. Danny has gathered data regarding orders and needs us to clean and analyze the data to optimise operations.
