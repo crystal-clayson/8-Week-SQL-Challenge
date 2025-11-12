@@ -554,7 +554,58 @@ cte_extras AS (
 - For example: "Meat Lovers: 2xBacon, Beef, ... , Salami"
 #### Explanation
 #### Code
+```sql
+
+WITH cte1 AS (
+	SELECT co.pizza_id,
+	ROW_NUMBER() OVER (ORDER BY order_id) AS pizza_number,
+		CASE WHEN extras != ''
+		THEN CONCAT(CASE WHEN exclusions != '' 
+				THEN REPLACE(toppings, exclusions + ', ', '')
+				ELSE toppings
+			END, ', ', co.extras) 
+		ELSE toppings
+		END AS a
+		FROM customer_orders co
+		JOIN pizza_recipes pr ON co.pizza_id = pr.pizza_id 
+),
+cte2 AS (
+	SELECT pizza_number, topping_name, COUNT(topping_name) AS N
+	FROM cte1
+	CROSS APPLY string_split(a, ',') as ss
+	JOIN pizza_toppings AS pt ON ss.value = pt.topping_id
+	GROUP BY pizza_number, topping_name, topping_id
+)\
+SELECT c1.pizza_number, 
+	CONCAT(pn.pizza_name, ': ', string_agg(
+		CASE
+			WHEN N>1 THEN CONCAT(N,'x',topping_name)
+			ELSE topping_name
+		END,', ')) AS ingredient_list
+FROM cte1 AS c1
+JOIN cte2 AS c2 ON c1.pizza_number = c2.pizza_number
+JOIN pizza_names AS pn ON c1.pizza_id = pn.pizza_id
+GROUP BY c1.pizza_number, pn.pizza_name
+ORDER BY c1.pizza_number;
+```
 #### Results
+| pizza_number	| ingredient_list |
+|---------------|-----------------|
+| 1	| Meat Lovers: Bacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
+| 2	| Meat Lovers: Bacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
+| 3	| Meat Lovers: Bacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
+| 4	| Vegetarian: Cheese, Mushrooms, Onions, Peppers, Tomato Sauce, Tomatoes |
+| 5	| Meat Lovers: Bacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
+| 6	| Meat Lovers: Bacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
+| 7	| Vegetarian: Cheese, Mushrooms, Onions, Peppers, Tomato Sauce, Tomatoes |
+| 8	| Meat Lovers: 2xBacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
+| 9	| Vegetarian: Cheese, Mushrooms, Onions, Peppers, Tomato Sauce, Tomatoes |
+| 10 | Vegetarian: Bacon, Cheese, Mushrooms, Onions, Peppers, Tomato Sauce, Tomatoes |
+| 11 | Meat Lovers: Bacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
+| 12 | Meat Lovers: 2xBacon, BBQ Sauce, Beef, 2xChicken, Mushrooms, Pepperoni, Salami |
+| 13 | Meat Lovers: Bacon, BBQ Sauce, Beef, Cheese, Chicken, Mushrooms, Pepperoni, Salami |
+| 14 | Meat Lovers: 2xBacon, BBQ Sauce, Beef, 2xCheese, Chicken, Mushrooms, Pepperoni, Salami |
+
 ### 6. What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
 #### Explanation
 #### Code
