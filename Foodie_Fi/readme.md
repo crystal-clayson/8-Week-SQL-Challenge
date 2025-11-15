@@ -54,12 +54,19 @@ The ```subscriptions``` table lists each ```customer_id```, the ```plan_id``` fo
 We wrote a query to generate a short description of customer onboarding, which will handle both customers who enroll after the free trial and customers who churn without subscribing.
 
 After a free trial period beginning 2020-08-01, Customer 1 successfully enrolled in the basic monthly subscription on 2020-08-08.
+
 After a free trial period beginning 2020-09-20, Customer 2 successfully enrolled in the pro annual subscription on 2020-09-27.
+
 Unfortunatly, Customer 11 chose not to enroll in a plan after their free trial ended on 2020-12-03.
+
 After a free trial period beginning 2020-12-15, Customer 13 successfully enrolled in the basic monthly subscription on 2020-12-22.
+
 After a free trial period beginning 2020-03-17, Customer 15 successfully enrolled in the pro monthly subscription on 2020-03-24.
+
 After a free trial period beginning 2020-05-31, Customer 16 successfully enrolled in the basic monthly subscription on 2020-06-07.
+
 After a free trial period beginning 2020-07-06, Customer 18 successfully enrolled in the pro monthly subscription on 2020-07-13.
+
 After a free trial period beginning 2020-06-22, Customer 19 successfully enrolled in the pro monthly subscription on 2020-06-29.
 
 We began with a CTE that assigns a number to each row, which we will use to determine which ```plan_id``` came second for each customer. Then, we used a ```CASE WHEN` statement with ```CONCAT``` to generate a sentence for each customer.
