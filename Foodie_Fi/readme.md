@@ -57,7 +57,7 @@ After a free trial period beginning 2020-08-01, Customer 1 successfully enrolled
 
 After a free trial period beginning 2020-09-20, Customer 2 successfully enrolled in the pro annual subscription on 2020-09-27.
 
-Unfortunatly, Customer 11 chose not to enroll in a plan after their free trial ended on 2020-12-03.
+Unfortunately, Customer 11 chose not to enroll in a plan after their free trial ended on 2020-12-03.
 
 After a free trial period beginning 2020-12-15, Customer 13 successfully enrolled in the basic monthly subscription on 2020-12-22.
 
@@ -82,7 +82,7 @@ SELECT CASE
 		WHEN s.plan_id != 4
 		THEN CONCAT('After a free trial period beginning ', DATEADD(DAY, -7, S.start_date), ', Customer ',s.customer_id, ' successfully enrolled in the ', 
 				p.plan_name, ' subscription on ', s.start_date, '.')
-		ELSE CONCAT('Unfortunatly, Customer ', s.customer_id, ' chose not to enroll in a plan after their free trial ended on ', DATEADD(DAY, 7, s.start_date), '.')
+		ELSE CONCAT('Unfortunately, Customer ', s.customer_id, ' chose not to enroll in a plan after their free trial ended on ', DATEADD(DAY, 7, s.start_date), '.')
 		END AS customer_journey
 FROM subscriptions AS s
 JOIN plans AS p ON s.plan_id = p.plan_id
