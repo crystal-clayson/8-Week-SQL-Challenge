@@ -93,6 +93,129 @@ WHERE s.customer_id IN (1,2,11,13,15,16,18,19)
 ```
 
 ## B. Data Analysis
+### 1. How many customers has Foodie-Fi ever had?
+#### Explanation
+- COUNT DISTINCT  to avoid counting customers with mutliple plans more than once.
+#### Code
+```sql
+SELECT COUNT(DISTINCT customer_id) AS total_customers
+FROM subscriptions;
+```
+#### Results
+| total_customers |
+|-----------------|
+| 1000            |
+
+### 2. What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
+#### Explanation
+- Group by the month value of the start_date value
+- Filter for trial plan (plan_id = 0)
+- Count all rows in each group
+#### Code
+```sql
+SELECT DATEPART(MONTH, start_date) AS month, COUNT(*) AS plans_started
+FROM subscriptions
+WHERE plan_id = '0'
+GROUP BY DATEPART(MONTH, start_date)
+ORDER BY DATEPART(MONTH, start_date);
+```
+#### Results
+| month | plans_started |
+|-------|---------------|
+| 1		| 88 			|
+| 2		| 68 			|
+| 3		| 94 			|
+| 4		| 81 			|
+| 5		| 88 			|
+| 6		| 79 			|
+| 7		| 89 			|
+| 8		| 88 			|
+| 9		| 87 			|
+| 10	| 79 			|
+| 11	| 75 			|
+| 12	| 84 			|
+
+
+### 3. What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name.
+#### Explanation
+- Join ```subscriptions``` table to ```plans``` table to use ```plan_name``` in results
+- Filter for ```start_date``` after 2020
+- Group by ```plan_name``` to show breakdown of events by plan name, and by ```plan_id``` to order by pla level
+- Count rows in each group
+#### Code
+```sql
+SELECT p.plan_name, COUNT(*)
+FROM subscriptions AS s
+JOIN plans AS p ON s.plan_id = p.plan_id
+WHERE DATEPART(YEAR, start_date) > 2020
+GROUP BY p.plan_name, p.plan_id
+ORDER BY p.plan_id;
+```
+#### Results
+| plan_name     | plans_started |
+|---------------|---------------|
+| basic monthly | 8 			|
+| pro monthlly  | 60 			|
+| pro annual	| 63 			|
+| churn     	| 71 			|
+
+### 4. What is the count and percentage of customers who have churned rounded to 1 decimal place?
+#### Explanation
+- Filter ```subscriptions``` table for customers who have churned (```plan_id``` = 4)
+- Count all rows for requested count of customers who have churned
+- Divide the count by a subquery that counts all distinct customer_id in the ```subscriptions``` table, multiply by 100, and CAST as a decimal for the requested percentage
+#### Code
+```sql
+SELECT COUNT(*) AS count,
+	ROUND(CAST(COUNT(*)*100.0/
+			(SELECT COUNT(DISTINCT customer_id) FROM subscriptions) 
+				AS DECIMAL(10,1)), 1) AS percentage
+FROM subscriptions
+WHERE plan_id = 4;
+```
+#### Results
+| count | percentage |
+|-------|------------|
+| 307   | 30.7       |
+
+### 5. How many customers have churned straight after their initial free trial - what percentage is this rounded to the nearest whole number?
+#### Explanation
+- All customers begin with a free trial (```plan_id = 0```) and will immediately either churn (```plan_id = 4```) or begin a paid subscription (```plan_id = 1, 2, or 3```). We need to identify rows where the second ```plan_id = 4```.
+- Create a CTE with a ROW_NUMBER window function to assign an order to buscriptions for each customer.
+- Filter the CTE for row with a ```plan_id = 4``` and ```sub_order = 2```.
+- Count the rows, and then use a subquery to pull the total number of customers from the ```subscriptions``` table to calculate the percentage.
+#### Code
+```sql
+WITH cte_sub_order AS (
+	SELECT *, ROW_NUMBER() OVER(PARTITION BY customer_id ORDER BY start_date) AS sub_order
+	FROM subscriptions
+)
+SELECT COUNT(*) AS count, 
+	COUNT(*)*100/(SELECT COUNT(DISTINCT customer_id) FROM subscriptions) AS percentage
+FROM cte_sub_order
+WHERE plan_id = 4 AND sub_order = 2;
+```
+#### Results
+| count | percentage |
+|-------|------------|
+| 92    | 9          |
+
+### 6. What is the number and percentage of customer plans after their initial free trial?
+#### Explanation
+- Essentially the same as the previous question, but filtering for rows where ```plan_id``` is not 4 where ```sub_order = 2```
+#### Code
+```sqlWITH cte_sub_order AS (
+	SELECT *, ROW_NUMBER() OVER(PARTITION BY customer_id ORDER BY start_date) AS sub_order
+	FROM subscriptions
+)
+SELECT COUNT(*) AS count, 
+	ROUND(CAST(COUNT(*)*100.0/(SELECT COUNT(DISTINCT customer_id) FROM subscriptions) AS decimal(10,0)), 0) AS percentage
+FROM cte_sub_order
+WHERE plan_id != 4 AND sub_order = 2;
+```
+#### Results
+| count | percentage |
+| 908   | 91         |
 
 ## C. Payments Table
 
