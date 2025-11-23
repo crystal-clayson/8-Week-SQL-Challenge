@@ -215,6 +215,7 @@ WHERE plan_id != 4 AND sub_order = 2;
 ```
 #### Results
 | count | percentage |
+|-------|------------|
 | 908   | 91         |
 
 ## C. Payments Table
