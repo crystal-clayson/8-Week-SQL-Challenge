@@ -218,5 +218,123 @@ WHERE plan_id != 4 AND sub_order = 2;
 |-------|------------|
 | 908   | 91         |
 
+###  7. What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
+#### Explanation
+- Create a CTE with a ROW_NUMBER window function, partitioned by customer_id, and ordered by start_date in a descending order so the last plan id for each customer will be labeled as row 1.
+- Join the CTE with the ```plans``` table ```plan-name``` can be used in the results.
+- Filter for ```sub_order = 1``` to select the last plan for each csutomer.
+- Group by ```plan_name```, count the rows, and do the percentage calculation.
+#### Code
+```sql
+WITH cte_sub_order AS (
+	SELECT *,
+		ROW_NUMBER() OVER(PARTITION BY customer_id ORDER BY start_date DESC) AS sub_order
+
+	FROM subscriptions
+	WHERE start_date < '2020-12-31'
+	)
+SELECT p.plan_id, p.plan_name, COUNT(c.customer_id) AS customer_count
+FROM cte_sub_order AS c
+JOIN plans AS p ON c.plan_id = p.plan_id
+WHERE sub_order = 1
+GROUP BY p.plan_name, p.plan_id
+ORDER BY p.plan_id;
+```
+#### Results
+| plan_id | plan_name     | customer_count | percentage |
+|---------|---------------|----------------|------------|
+| 0		  | trial 	      |	19			   | 1.9        |
+| 1		  | basic monthly |	224            | 22.4       |
+| 2		  | pro monthly   |	327            | 32.7       |
+| 3		  | pro annual    |	195            | 19.5       |
+| 4		  | churn 		  |	235            | 23.5       |
+
+### 8. How many customers have upgraded to an annual plan in 2020?
+#### Explanation
+- Create a CTE with the LAG function to tie each plan_id to the previous plan_id for every customer.
+- Filter for rows with ```plan_id = 3``` (the plan_id for the annual plan), the ```last_sub``` less than 3, which will indicate an upgrade, and the start date for the upgrade falling in 2020.
+- Count the rows
+#### Code
+```sql
+WITH cte_sub_order AS (
+	SELECT * ,
+		LAG(plan_id, 1) OVER(PARTITION BY customer_id ORDER BY start_date ASC) AS last_sub
+	FROM subscriptions
+	)
+SELECT COUNT(*) AS upgrades
+FROM cte_sub_order
+WHERE plan_id = 3 AND last_sub < 3 AND start_date BETWEEN '01-01-2020' AND '12-31-2020';
+```
+#### Results
+| upgrades |
+|----------|
+| 195      |
+
+### 9. How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
+#### Explanation
+- Note: while in this data set all customers start with a free trial, this code should handle edge cases where a customer skips the free trial and starts with a paid subscription.
+- Create a CTE with the ROW_NUMBER window function to give each customer's plans a row number, starting with the first subscription in the first row
+- Subquery to select the first subscription for each customer
+- Join the results of the subquery to the subscriptions table to match the first start date to the annual plan start date for each customer
+- Take the average of the difference between the first start date to the annual plan start date.
+#### Code
+```sql
+WITH cte_order as (
+	SELECT * ,
+		ROW_NUMBER() OVER(PARTITION BY customer_id ORDER BY start_date ASC) AS sub_order
+	FROM subscriptions
+	)
+SELECT AVG(DATEDIFF(DAY, f.start_date, s.start_date)) AS days_to_annual
+FROM (	SELECT * 
+	FROM cte_order
+	WHERE sub_order = 1) AS f
+JOIN ( 
+	SELECT * 
+	FROM subscriptions 
+	WHERE plan_id = 3) AS s ON f.customer_id = s.customer_id
+```
+#### Results
+| days_to_annual |
+|----------------|
+| 104            |
+
+### 10. Break down how long it takes customers to upgrade to the annual plan into 30 day buckets.
+#### Explanation
+- Note: while in this data set all customers start with a free trial, this code should handle edge cases where a customer skips the free trial and starts with a paid subscription.
+- 
+#### Code
+```sql
+WITH cte_order AS (
+	SELECT * ,
+		ROW_NUMBER() OVER(PARTITION BY customer_id ORDER BY start_date ASC) AS sub_order
+	FROM subscriptions
+	), 
+cte_bucket AS (
+	SELECT s.customer_id, DATEDIFF(DAY, f.start_date, s.start_date) AS days_to_annual, 
+		(DATEDIFF(DAY, f.start_date, s.start_date)-1)/30 AS bucket
+	FROM cte_order AS f
+	JOIN subscriptions AS s ON f.customer_id = s.customer_id
+	WHERE s.plan_id = 3 AND f.sub_order = 1
+	)
+SELECT CONCAT(bucket*30+1,'-',bucket*30+30 ) AS bucket, COUNT(*) AS upgrades
+FROM cte_bucket
+GROUP BY bucket;
+```
+#### Results
+| bucket 	| upgrades |
+|-----------|----------|
+| 1-30		| 49       |
+| 31-60		| 24       |
+| 61-90		| 34       |
+| 91-120	| 35       |
+| 121-150	| 42       |
+| 151-180	| 36       |
+| 181-210	| 26       |
+| 211-240	| 4        |
+| 241-270	| 5        |
+| 271-300	| 1        |
+| 301-330	| 1        |
+| 331-360	| 1        |
+
 ## C. Payments Table
 
