@@ -301,7 +301,13 @@ JOIN (
 ### 10. Break down how long it takes customers to upgrade to the annual plan into 30 day buckets.
 #### Explanation
 - Note: while in this data set all customers start with a free trial, this code should handle edge cases where a customer skips the free trial and starts with a paid subscription.
-- 
+- The first CTE assigns an order to each customer's plans. 
+- Joins the first CTE (as f to indicate that this is where we'll get the first plan start date) to the full subscription list (as a to indicate that this is where we'll get the annual plan start date). 
+- Filter for customers who have upgraded to the annual plan and for the first subscription plan for each customer. 
+- Assign each customer in the joined table a bucket. Bucket 0 corresponds with the 0-30 day group, Bucket 1 corresponds with the 31-60 day bucket, and so on.
+  - Subtracting 1 from the DATEDIFF ensures that customers with a multiple of 30 days between their initial start date and their annual plan start date are put into the correct bucket.
+- Create labels for the buckets with a CONCAT function
+- Count the customers in each group
 #### Code
 ```sql
 WITH cte_order AS (
@@ -310,11 +316,11 @@ WITH cte_order AS (
 	FROM subscriptions
 	), 
 cte_bucket AS (
-	SELECT s.customer_id, DATEDIFF(DAY, f.start_date, s.start_date) AS days_to_annual, 
-		(DATEDIFF(DAY, f.start_date, s.start_date)-1)/30 AS bucket
+	SELECT a.customer_id, DATEDIFF(DAY, f.start_date, a.start_date) AS days_to_annual, 
+		(DATEDIFF(DAY, f.start_date, a.start_date)-1)/30 AS bucket
 	FROM cte_order AS f
-	JOIN subscriptions AS s ON f.customer_id = s.customer_id
-	WHERE s.plan_id = 3 AND f.sub_order = 1
+	JOIN subscriptions AS a ON f.customer_id = s.customer_id
+	WHERE a.plan_id = 3 AND f.sub_order = 1
 	)
 SELECT CONCAT(bucket*30+1,'-',bucket*30+30 ) AS bucket, COUNT(*) AS upgrades
 FROM cte_bucket
@@ -336,5 +342,22 @@ GROUP BY bucket;
 | 301-330	| 1        |
 | 331-360	| 1        |
 
-## C. Payments Table
-
+### 11. How many customers downgraded from a pro monthly to a basic monthly plan in 2020?
+#### Explanation
+- 
+#### Code
+```sql
+WITH cte_next_plan AS (
+	SELECT customer_id, plan_id, start_date,
+		LEAD(plan_id) OVER(PARTITION BY customer_id ORDER BY start_date) AS next_plan
+	FROM subscriptions
+	WHERE DATEPART(year, start_date) = 2020
+	)
+SELECT COUNT(customer_id) AS downgraded_subs
+FROM cte_next_plan
+WHERE plan_id = 2 AND next_plan = 1;
+```
+#### Results
+| downgraded_subs |
+|-----------------|
+| 0               |
