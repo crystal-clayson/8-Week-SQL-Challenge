@@ -3,13 +3,14 @@
 ## Table of Contents
 - [Business Task](#business-task)
 -  [Data Overview](#data-overview)
--  [Case_Study_Questions](#case-study-questions)
+-  [Case Study Questions Part A](#case-study-questions-part-a)
+-  [Case Study Questions Part B](#case-study-questions-part-b)
     
 ## Business Task
 
 ## Data Overview
 
-## Case Study Questions
+## Case Study Questions Part A
 ### 1. How many unique nodes are there in the Data Bank system?
 #### Explanation
 - There are several nodes in each region. The node ids start with 1 in each region. so a simple COUNT DISTINCT would not count all the nodes.
@@ -117,10 +118,81 @@ SELECT DISTINCT region_name,
 FROM cte_days; 
 ```
 #### Results
-| region_name	| median	| perc_80	| perc_90 |
+| region_name | median	| perc_80	| perc_90 |
 |-------------|---------|---------|---------|
-| Africa	    | 15	    | 24	    | 28      |
+| Africa	  | 15	    | 24	    | 28      |
 | Asia	      | 15	    | 23	    | 28      |
-| America	    | 15	    | 23	    | 28      |
+| America	  | 15	    | 23	    | 28      |
 | Australia	  | 15	    | 23	    | 28      |
-| Europe	    | 15	    | 24	    | 28      |
+| Europe	  | 15	    | 24	    | 28      |
+
+## Case Study Questions Part B
+### 1. What is the unique count and total amount for each transaction type?
+#### Explanation
+-
+#### Code
+```sql
+SELECT txn_type,
+	COUNT(*) AS txn_count,
+	SUM(txn_amount) AS txn_total
+FROM customer_transactions
+GROUP BY txn_type;
+```
+#### Results
+| txn_type   | txn_count | txn_total |
+|----------- |-----------|-----------|
+| withdrawal | 1580      | 793003    |
+| deposit    | 2671      | 1359168   |
+| purchase   | 1617      | 806537    |
+
+### 2. What is the average total historical deposit counts and amounts for all customers?
+#### Explanation
+-
+#### Code
+```sql
+WITH cte_counts AS (
+	SELECT COUNT(*) AS txn_count,
+		SUM(txn_amount) AS txn_total
+	FROM customer_transactions
+	GROUP BY customer_id
+	)
+SELECT AVG(txn_count) AS avg_count,
+	AVG(txn_total) AS avg_total
+FROM cte_counts;
+```
+#### Results
+| avg_count | avg_total |
+|-----------|-----------|
+| 11        | 5917      |
+
+### 3. For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
+#### Explanation
+-
+#### Code
+```sql
+SELECT COUNT(*) AS total
+FROM (SELECT customer_id
+	FROM customer_transactions
+	GROUP BY customer_id
+	HAVING COUNT(CASE WHEN txn_type = 'deposit' THEN 1 ELSE 0 END) > 1
+		AND COUNT(CASE WHEN txn_type = 'withdrawal' OR txn_type = 'purchase' THEN 1 ELSE 0 END) >1
+	) AS filtered;
+```
+#### Results
+| total |
+|-------|
+| 500   |
+
+### 4. What is the closing balance for each customer at the end of each month?
+#### Explanation
+- Assume every customer started on 2020-01-01 with an account balance of $0.
+#### Code
+```sql
+
+```
+#### Results
+| 
+|-
+| 
+
+### 5. What is the percentage of customers who increase their closing balance by more than 5% over the four month period?
